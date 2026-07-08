@@ -1,3 +1,4 @@
+const socket = io(); // connects to same domain
 const ROOM_ID = new URLSearchParams(window.location.search).get('room');
 document.getElementById('roomId').innerText = ROOM_ID;
 
@@ -6,87 +7,62 @@ let peer;
 let connections = {};
 let chatOpen = false;
 
-// Everyone tries to connect to the "host" ID
-const HOST_ID = ROOM_ID + '-host'; 
-const MY_ID = ROOM_ID + '-' + Math.random().toString(36).substr(2, 5);
-
 async function init() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
     document.getElementById('localVideo').srcObject = localStream;
   } catch(e) { alert("Please allow Camera and Microphone"); }
 
-  peer = new Peer(MY_ID, {
+  peer = new Peer(undefined, {
     host: '0.peerjs.com', port: 443, path: '/', debug: 2
   });
 
-  peer.on('open', id => { 
-    console.log("I am:", id);
-    // Wait 1s then try to become host. If taken, join as guest
-    setTimeout(tryToBeHost, 1000);
+  peer.on('open', myPeerId => {
+    console.log("My Peer ID:", myPeerId);
+    socket.emit('join-room', ROOM_ID, myPeerId);
   });
 
+  // Someone is calling us
   peer.on('call', call => {
     call.answer(localStream);
-    call.on('stream', s => showRemoteStream(s));
-    setupConn(call.peer, call);
+    call.on('stream', remoteStream => showRemoteStream(remoteStream));
+    setupConnection(call.peer, call);
   });
 
-  peer.on('connection', conn => {
-    setupConn(conn.peer, null, conn);
+  // Socket tells us someone joined
+  socket.on('user-connected', peerId => {
+    console.log("User connected:", peerId);
+    connectToNewUser(peerId);
   });
 }
 
-function tryToBeHost() {
-  // Try to claim the host ID
-  const hostPeer = new Peer(HOST_ID, {
-    host: '0.peerjs.com', port: 443, path: '/'
-  });
-  
-  hostPeer.on('open', () => {
-    console.log("I am HOST");
-    peer = hostPeer; // switch to host
-    setupHostListeners();
-  });
-  
-  hostPeer.on('error', () => {
-    console.log("Host taken, joining as guest");
-    joinAsGuest(); // host already exists
-  });
-}
-
-function setupHostListeners() {
-  peer.on('call', call => {
-    call.answer(localStream);
-    call.on('stream', s => showRemoteStream(s));
-    setupConn(call.peer, call);
-  });
-  peer.on('connection', conn => setupConn(conn.peer, null, conn));
-}
-
-function joinAsGuest() {
-  const call = peer.call(HOST_ID, localStream);
-  if(call){
-    call.on('stream', s => showRemoteStream(s));
-    setupConn(HOST_ID, call);
+function connectToNewUser(peerId) {
+  const call = peer.call(peerId, localStream);
+  if(call) {
+    call.on('stream', remoteStream => showRemoteStream(remoteStream));
+    call.on('close', () => { /* remove video */ });
   }
-  const conn = peer.connect(HOST_ID, { reliable: true }); // reliable = chat won't drop
-  setupConn(HOST_ID, null, conn);
+  
+  const conn = peer.connect(peerId, { reliable: true });
+  setupConnection(peerId, call, conn);
 }
 
-function setupConn(peerId, call, conn) {
+function setupConnection(peerId, call, conn) {
   if(connections[peerId]) return;
   connections[peerId] = { call, conn };
   
   if(conn) {
-    conn.on('open', () => console.log("Chat open with", peerId));
-    conn.on('data', data => addMessage("Friend", data)); // THIS makes chat 2-way
+    conn.on('open', () => console.log("Data channel open with", peerId));
+    conn.on('data', data => addMessage("Friend", data));
     conn.on('close', () => delete connections[peerId]);
   }
 }
 
 function showRemoteStream(stream) {
-  document.getElementById('remoteVideo').srcObject = stream;
+  const remoteVideo = document.getElementById('remoteVideo');
+  if(!remoteVideo.srcObject) { // only set once
+    remoteVideo.srcObject = stream;
+  }
 }
 
 function toggleChat() {
@@ -101,7 +77,6 @@ function sendChat() {
   const msg = input.value.trim();
   if(msg === '') return;
   
-  // Send to ALL connected peers
   Object.values(connections).forEach(c => { 
     if(c.conn && c.conn.open) c.conn.send(msg); 
   });
