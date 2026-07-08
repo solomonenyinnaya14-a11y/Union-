@@ -2,28 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Union - Room</title>
+<link rel="stylesheet" href="style.css">
 <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-<style>
-  body { margin:0; background:#000; color:white; font-family:Arial, sans-serif; overflow:hidden; }
-  #videos { display:flex; flex-wrap:wrap; gap:10px; padding:10px; height:calc(100vh - 80px); justify-content:center; align-items:center; }
-  video { width:45%; max-width:600px; border-radius:12px; background:#222; }
-  #controls { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); display:flex; gap:12px; background:#1a1a1a; padding:12px 20px; border-radius:50px; z-index:1001; }
-  #controls button { background:#333; border:none; color:white; width:50px; height:50px; border-radius:50%; font-size:20px; cursor:pointer; }
-  #controls button.active { background:#ef4444; }
-  
-  /* Chat */
-  #chatPanel { position:fixed; right:0; top:0; width:320px; height:100%; background:#111; color:white; display:none; flex-direction:column; border-left:1px solid #333; z-index:999; }
-  #chatMessages { flex:1; padding:12px; overflow-y:auto; font-size:14px; }
-  #chatInput { flex:1; background:#222; border:none; color:white; padding:10px; border-radius:8px; outline:none; }
-  #chatBtn { position:fixed; bottom:90px; right:20px; background:#2563eb; border:none; border-radius:50%; width:56px; height:56px; font-size:24px; cursor:pointer; z-index:1000; }
-  #roomInfo { position:fixed; top:20px; left:20px; background:#1a1a1a; padding:8px 16px; border-radius:20px; font-size:14px; }
-</style>
 </head>
 <body>
 
-<div id="roomInfo">Room: <b id="roomId"></b></div>
+<div id="roomInfo">
+  Room: <b id="roomId"></b> 
+  <button id="copyBtn" onclick="copyRoom()">Copy</button>
+</div>
 
 <div id="videos">
   <video id="localVideo" autoplay muted playsinline></video>
@@ -38,131 +27,18 @@
 
 <!-- Chat UI -->
 <div id="chatPanel">
-  <div style="padding:15px; border-bottom:1px solid #333; font-weight:bold;">Chat</div>
+  <div id="chatHeader">
+    Chat
+    <span onclick="toggleChat()">✕</span>
+  </div>
   <div id="chatMessages"></div>
-  <div style="display:flex; padding:10px; border-top:1px solid #333;">
+  <div id="chatInputWrap">
     <input id="chatInput" type="text" placeholder="Send a message..." onkeydown="if(event.key==='Enter') sendChat()">
-    <button onclick="sendChat()" style="margin-left:8px; background:#2563eb; border:none; color:white; padding:10px 14px; border-radius:8px; cursor:pointer;">Send</button>
+    <button id="sendBtn" onclick="sendChat()">Send</button>
   </div>
 </div>
 <button id="chatBtn" onclick="toggleChat()">💬</button>
 
-<script>
-const ROOM_ID = new URLSearchParams(window.location.search).get('room');
-document.getElementById('roomId').innerText = ROOM_ID;
-
-let localStream;
-let peer;
-let connections = {}; // store all peers + datachannels
-let myPeerId;
-let chatOpen = false;
-
-// 1. GET CAM + MIC
-async function init() {
-  localStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
-  document.getElementById('localVideo').srcObject = localStream;
-
-  // 2. CONNECT TO PEERJS CLOUD
-  peer = new Peer(ROOM_ID + '-' + Math.random().toString(36).substr(2, 4), {
-    host: '0.peerjs.com',
-    port: 443,
-    path: '/'
-  });
-
-  peer.on('open', id => {
-    myPeerId = id;
-    console.log("My ID:", id);
-    // Broadcast that we joined. Others will call us
-  });
-
-  // 3. WHEN SOMEONE CALLS US
-  peer.on('call', call => {
-    call.answer(localStream);
-    call.on('stream', remoteStream => showRemoteStream(remoteStream, call.peer));
-    setupConnection(call.peer, call);
-  });
-
-  // 4. WHEN SOMEONE CONNECTS FOR CHAT
-  peer.on('connection', conn => setupConnection(conn.peer, null, conn));
-
-  // 5. TRY TO CONNECT TO OTHERS IN SAME ROOM
-  // Simple trick: keep trying common IDs in the room
-  setInterval(() => {
-    if(Object.keys(connections).length < 1) { // only 2 people for now
-      const possibleId = ROOM_ID + '-' + Math.random().toString(36).substr(2, 4);
-      if(possibleId!== myPeerId) connectToPeer(possibleId);
-    }
-  }, 3000);
-}
-
-function connectToPeer(peerId) {
-  const call = peer.call(peerId, localStream);
-  if(call) {
-    call.on('stream', remoteStream => showRemoteStream(remoteStream, peerId));
-    const conn = peer.connect(peerId);
-    setupConnection(peerId, call, conn);
-  }
-}
-
-function setupConnection(peerId, call, conn) {
-  if(!connections[peerId]) {
-    connections[peerId] = { call, conn };
-    
-    if(conn) {
-      conn.on('data', data => addMessage("Friend", data));
-      conn.on('open', () => console.log("Chat connected to", peerId));
-    }
-    if(call) {
-      call.on('close', () => delete connections[peerId]);
-    }
-  }
-}
-
-function showRemoteStream(stream, peerId) {
-  document.getElementById('remoteVideo').srcObject = stream;
-}
-
-// CHAT FUNCTIONS
-function toggleChat() {
-  chatOpen =!chatOpen;
-  document.getElementById('chatPanel').style.display = chatOpen? 'flex' : 'none';
-}
-
-function sendChat() {
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if(msg === '') return;
-  
-  // Send to all connected peers
-  Object.values(connections).forEach(c => {
-    if(c.conn && c.conn.open) c.conn.send(msg);
-  });
-  
-  addMessage("You", msg);
-  input.value = '';
-}
-
-function addMessage(sender, text) {
-  const chatBox = document.getElementById('chatMessages');
-  const el = document.createElement('div');
-  el.innerHTML = `<b style="color:#60a5fa">${sender}:</b> ${text}`;
-  el.style.marginBottom = '10px';
-  chatBox.appendChild(el);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// CONTROLS
-function toggleMic() {
-  localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled;
-  document.getElementById('micBtn').classList.toggle('active');
-}
-function toggleCam() {
-  localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled;
-  document.getElementById('camBtn').classList.toggle('active');
-}
-function leave() { window.location.href = '/'; }
-
-init();
-</script>
+<script src="room.js"></script>
 </body>
 </html>
