@@ -1,107 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Union — Meet Together. Build Together.</title>
-    <meta name="description" content="Start a video meeting in 1 click. No downloads, no accounts." />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Union - Meet Together. Build Together.</title>
+<link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body style="background:#000; color:white; overflow:auto;">
 
-    <nav class="navbar">
-        <div class="container">
-            <a href="index.html" class="logo">📹 Union</a>
-            <div class="nav-actions">
-                <button class="btn-ghost" id="joinBtnNav">Join</button>
-                <button class="btn-primary" id="startBtnNav">Start a Call</button>
-            </div>
-        </div>
-    </nav>
+<nav style="padding:20px; display:flex; gap:10px;">
+  <a href="index.html" style="color:#60a5fa; text-decoration:none; font-weight:bold; font-size:20px;">🏠 Union</a>
+  <div style="margin-left:auto; display:flex; gap:10px;">
+    <a href="#" onclick="joinRoom()" style="background:#333; padding:8px 16px; border-radius:20px; text-decoration:none; color:white;">Join</a>
+    <a href="#" onclick="startCall()" style="background:#2563eb; padding:8px 16px; border-radius:20px; text-decoration:none; color:white;">Start a Call</a>
+  </div>
+</nav>
 
-    <section class="hero">
-        <div class="container">
-            <h1>Meet Together.<br><span>Build Together.</span></h1>
-            <p>Start a video meeting in 1 click. No downloads, no accounts.</p>
-            <div class="hero-ctas">
-                <button class="btn-primary" id="startBtnHero">📹 Start a Call</button>
-                <button class="btn-secondary" id="joinBtnHero">🔗 Join a Call</button>
-            </div>
-            <p class="subtext">Free. Secure. Works in your browser.</p>
-        </div>
-    </section>
+<div style="max-width:900px; margin:60px auto; padding:20px; text-align:left;">
+  <h1 style="font-size:48px; line-height:1.1; margin-bottom:20px;">
+    Meet Together.<br>Build Together.
+  </h1>
+  <p style="font-size:18px; color:#aaa; margin-bottom:30px;">
+    Start a video meeting in 1 click. No downloads, no accounts.
+  </p>
+  
+  <div style="display:flex; gap:12px; margin-bottom:40px;">
+    <button onclick="startCall()" style="background:#2563eb; border:none; color:white; padding:14px 24px; border-radius:12px; font-size:16px; cursor:pointer;">🏠 Start a Call</button>
+    <button onclick="joinRoom()" style="background:#222; border:1px solid #333; color:white; padding:14px 24px; border-radius:12px; font-size:16px; cursor:pointer;">🔗 Join a Call</button>
+  </div>
 
-    <section class="how">
-        <div class="container">
-            <h2>Start meeting in 3 seconds</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="num">1</div>
-                    <h3>Click Start</h3>
-                    <p>Create a meeting room instantly</p>
-                </div>
-                <div class="step">
-                    <div class="num">2</div>
-                    <h3>Share Link</h3>
-                    <p>Copy the link and send to anyone</p>
-                </div>
-                <div class="step">
-                    <div class="num">3</div>
-                    <h3>Join</h3>
-                    <p>They click and join. That's it.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+  <p style="color:#aaa;">Free. Secure. Works in your browser.</p>
 
-    <section class="features">
-        <div class="container">
-            <h2>Everything you need</h2>
-            <div class="feature-grid">
-                <div class="card">
-                    <div class="icon">📹</div>
-                    <h3>HD Video & Audio</h3>
-                    <p>Crystal clear 720p video and audio</p>
-                </div>
-                <div class="card">
-                    <div class="icon">🔗</div>
-                    <h3>One Link Join</h3>
-                    <p>No downloads. Just click the link.</p>
-                </div>
-                <div class="card">
-                    <div class="icon">🖥️</div>
-                    <h3>Screen Share</h3>
-                    <p>Share your screen with 1 click</p>
-                </div>
-            </div>
-        </div>
-    </section>
+  <h2 style="font-size:32px; margin-top:60px; margin-bottom:30px;">Start meeting in 3 seconds</h2>
 
-    <footer>
-        <div class="container">
-            <p>© 2026 Union. Built for teams and friends.</p>
-            <div class="footer-links">
-                <a href="#">Privacy</a>
-                <a href="#">Terms</a>
-                <a href="#">Contact</a>
-            </div>
-        </div>
-    </footer>
-
-    <div class="modal" id="joinModal">
-        <div class="modal-content">
-            <h3>Join a Meeting</h3>
-            <input type="text" id="roomInput" placeholder="Paste meeting link or room ID" />
-            <div class="modal-actions">
-                <button class="btn-secondary" id="closeModal">Cancel</button>
-                <button class="btn-primary" id="goToRoom">Join</button>
-            </div>
-        </div>
+  <div style="display:grid; gap:30px;">
+    <div>
+      <h3 style="font-size:24px;">1 Click Start</h3>
+      <p style="color:#aaa;">Create a meeting room instantly</p>
     </div>
+    <div>
+      <h3 style="font-size:24px;">2 Share Link</h3>
+      <p style="color:#aaa;">Copy the link and send to anyone</p>
+    </div>
+    <div>
+      <h3 style="font-size:24px;">3 Join</h3>
+      <p style="color:#aaa;">They click and join. That's it.</p>
+    </div>
+  </div>
 
-    <script src="script.js"></script>
+  <h2 style="font-size:32px; margin-top:60px;">Everything you need</h2>
+</div>
+
+<script>
+function startCall() {
+  const roomId = Math.random().toString(36).substring(2, 8);
+  window.location.href = `room.html?room=${roomId}`;
+}
+
+function joinRoom() {
+  const roomId = prompt("Enter Room ID:");
+  if(roomId) window.location.href = `room.html?room=${roomId}`;
+}
+</script>
 </body>
 </html>
