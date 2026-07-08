@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Union — Meet Together. Build Together.</title>
+    <meta name="description" content="Start a video meeting in 1 click. No downloads, no accounts." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">📹 Union</a>
+            <div class="nav-actions">
+                <button class="btn-ghost" id="joinBtnNav">Join</button>
+                <button class="btn-primary" id="startBtnNav">Start a Call</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Meet Together.<br><span>Build Together.</span></h1>
+            <p>Start a video meeting in 1 click. No downloads, no accounts.</p>
+            <div class="hero-ctas">
+                <button class="btn-primary" id="startBtnHero">📹 Start a Call</button>
+                <button class="btn-secondary" id="joinBtnHero">🔗 Join a Call</button>
+            </div>
+            <p class="subtext">Free. Secure. Works in your browser.</p>
+        </div>
+    </section>
+
+    <section class="how">
+        <div class="container">
+            <h2>Start meeting in 3 seconds</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="num">1</div>
+                    <h3>Click Start</h3>
+                    <p>Create a meeting room instantly</p>
+                </div>
+                <div class="step">
+                    <div class="num">2</div>
+                    <h3>Share Link</h3>
+                    <p>Copy the link and send to anyone</p>
+                </div>
+                <div class="step">
+                    <div class="num">3</div>
+                    <h3>Join</h3>
+                    <p>They click and join. That's it.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Everything you need</h2>
+            <div class="feature-grid">
+                <div class="card">
+                    <div class="icon">📹</div>
+                    <h3>HD Video & Audio</h3>
+                    <p>Crystal clear 720p video and audio</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🔗</div>
+                    <h3>One Link Join</h3>
+                    <p>No downloads. Just click the link.</p>
+                </div>
+                <div class="card">
+                    <div class="icon">🖥️</div>
+                    <h3>Screen Share</h3>
+                    <p>Share your screen with 1 click</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Union. Built for teams and friends.</p>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal" id="joinModal">
+        <div class="modal-content">
+            <h3>Join a Meeting</h3>
+            <input type="text" id="roomInput" placeholder="Paste meeting link or room ID" />
+            <div class="modal-actions">
+                <button class="btn-secondary" id="closeModal">Cancel</button>
+                <button class="btn-primary" id="goToRoom">Join</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
