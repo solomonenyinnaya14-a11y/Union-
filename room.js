@@ -1,90 +1,117 @@
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
-const status = document.getElementById('status');
-const urlParams = new URLSearchParams(window.location.search);
-const roomId = urlParams.get('room') || 'unknown';
-document.getElementById('roomIdDisplay').innerText = `Room: ${roomId}`;
+const ROOM_ID = new URLSearchParams(window.location.search).get('room');
+document.getElementById('roomId').innerText = ROOM_ID;
 
 let localStream;
-let peerConnection;
+let peer;
+let connections = {};
+let myPeerId;
+let chatOpen = false;
 
-const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+// 1. GET CAM + MIC
+async function init() {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
+    document.getElementById('localVideo').srcObject = localStream;
+  } catch(e) { alert("Please allow Camera and Microphone access"); }
 
-async function startCamera() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        localVideo.srcObject = localStream;
-        status.innerHTML = "Camera on.<br>Share this link for someone to join.";
-        createPeerConnection();
-    } catch (err) {
-        alert("Please allow camera and microphone access to use Union");
-        console.error("Error accessing media devices:", err);
+  // 2. CONNECT TO PEERJS CLOUD
+  peer = new Peer(ROOM_ID + '-' + Math.random().toString(36).substr(2, 4), {
+    host: '0.peerjs.com', port: 443, path: '/'
+  });
+
+  peer.on('open', id => { myPeerId = id; console.log("My ID:", id); });
+
+  peer.on('call', call => {
+    call.answer(localStream);
+    call.on('stream', remoteStream => showRemoteStream(remoteStream));
+    setupConnection(call.peer, call);
+  });
+
+  peer.on('connection', conn => setupConnection(conn.peer, null, conn));
+
+  // Auto-try to connect to others in room every 3s
+  setInterval(() => {
+    if(Object.keys(connections).length < 1) {
+      const possibleId = ROOM_ID + '-' + Math.random().toString(36).substr(2, 4);
+      if(possibleId!== myPeerId) connectToPeer(possibleId);
     }
+  }, 3000);
 }
 
-function createPeerConnection() {
-    peerConnection = new RTCPeerConnection(config);
-
-    localStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, localStream);
-    });
-
-    peerConnection.ontrack = (event) => {
-        if (event.streams && event.streams[0]) {
-            remoteVideo.srcObject = event.streams[0];
-            status.style.display = 'none';
-        }
-    };
-
-    peerConnection.onicecandidate = (event) => {
-        if (event.candidate) {
-            console.log("ICE Candidate:", JSON.stringify(event.candidate));
-        }
-    };
-
-    peerConnection.onconnectionstatechange = () => {
-        console.log("Connection state:", peerConnection.connectionState);
-    };
+function connectToPeer(peerId) {
+  const call = peer.call(peerId, localStream);
+  if(call) {
+    call.on('stream', remoteStream => showRemoteStream(remoteStream));
+    const conn = peer.connect(peerId);
+    setupConnection(peerId, call, conn);
+  }
 }
 
-let micOn = true;
-document.getElementById('micBtn').onclick = () => {
-    micOn =!micOn;
-    if(localStream) localStream.getAudioTracks()[0].enabled = micOn;
-    document.getElementById('micBtn').innerText = micOn? '🎤' : '🔇';
-}
-
-let camOn = true;
-document.getElementById('camBtn').onclick = () => {
-    camOn =!camOn;
-    if(localStream) localStream.getVideoTracks()[0].enabled = camOn;
-    document.getElementById('camBtn').innerText = camOn? '📹' : '🚫';
-}
-
-document.getElementById('screenBtn').onclick = async () => {
-    try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const screenTrack = screenStream.getTracks()[0];
-        const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
-        if(sender) sender.replaceTrack(screenTrack);
-        screenTrack.onended = () => {
-            if(localStream) sender.replaceTrack(localStream.getVideoTracks()[0]);
-        };
-    } catch(err) {
-        console.error("Error sharing screen:", err);
+function setupConnection(peerId, call, conn) {
+  if(!connections[peerId]) {
+    connections[peerId] = { call, conn };
+    if(conn) {
+      conn.on('data', data => addMessage("Friend", data));
+      conn.on('open', () => console.log("Chat connected to", peerId));
     }
+    if(call) { call.on('close', () => delete connections[peerId]); }
+  }
 }
 
-document.getElementById('endBtn').onclick = () => {
-    if(peerConnection) peerConnection.close();
-    if(localStream) localStream.getTracks().forEach(track => track.stop());
-    window.location.href = 'index.html';
+function showRemoteStream(stream) {
+  document.getElementById('remoteVideo').srcObject = stream;
 }
 
+// CHAT FUNCTIONS
+function toggleChat() {
+  chatOpen =!chatOpen;
+  document.getElementById('chatPanel').style.display = chatOpen? 'flex' : 'none';
+  if(chatOpen) setTimeout(() => document.getElementById('chatInput').focus(), 100);
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if(msg === '') return;
+  
+  Object.values(connections).forEach(c => {
+    if(c.conn && c.conn.open) c.conn.send(msg);
+  });
+  
+  addMessage("You", msg);
+  input.value = '';
+}
+
+function addMessage(sender, text) {
+  const chatBox = document.getElementById('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'msg';
+  el.innerHTML = `<b>${sender}:</b> ${text}`;
+  chatBox.appendChild(el);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// FIX: Scroll chat when keyboard opens on mobile
+document.getElementById('chatInput').addEventListener('focus', () => {
+  setTimeout(() => {
+    document.getElementById('chatMessages').scrollTop = 99999;
+  }, 300);
+});
+
+// CONTROLS
+function toggleMic() {
+  localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled;
+  document.getElementById('micBtn').classList.toggle('active');
+}
+function toggleCam() {
+  localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled;
+  document.getElementById('camBtn').classList.toggle('active');
+}
+function leave() { window.location.href = 'index.html'; }
 function copyRoom() {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-        alert('Room link copied to clipboard!');
-    });
+  navigator.clipboard.writeText(window.location.href);
+  document.getElementById('copyBtn').innerText = 'Copied!';
+  setTimeout(() => document.getElementById('copyBtn').innerText = 'Copy', 1500);
 }
 
-window.addEventListener('load', startCamera);
+init();
