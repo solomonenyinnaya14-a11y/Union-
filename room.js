@@ -1,48 +1,43 @@
-const socket = io(); // connects to same domain
+const socket = io();
 const ROOM_ID = new URLSearchParams(window.location.search).get('room');
 document.getElementById('roomId').innerText = ROOM_ID;
+document.getElementById('roomIdTop').innerText = ROOM_ID;
 
 let localStream;
 let peer;
 let connections = {};
 let chatOpen = false;
 
-async function init() {
+async function startCall() {
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('roomInfo').style.display = 'flex';
+  document.getElementById('controls').style.display = 'flex';
+
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
     document.getElementById('localVideo').srcObject = localStream;
-  } catch(e) { alert("Please allow Camera and Microphone"); }
+  } catch(e) { alert("Please allow Camera and Microphone in Settings > Safari"); return; }
 
-  peer = new Peer(undefined, {
-    host: '0.peerjs.com', port: 443, path: '/', debug: 2
-  });
+  peer = new Peer(undefined, { host: '0.peerjs.com', port: 443, path: '/' });
 
   peer.on('open', myPeerId => {
-    console.log("My Peer ID:", myPeerId);
     socket.emit('join-room', ROOM_ID, myPeerId);
   });
 
-  // Someone is calling us
   peer.on('call', call => {
     call.answer(localStream);
-    call.on('stream', remoteStream => showRemoteStream(remoteStream));
+    call.on('stream', s => showRemoteStream(s));
     setupConnection(call.peer, call);
   });
 
-  // Socket tells us someone joined
   socket.on('user-connected', peerId => {
-    console.log("User connected:", peerId);
     connectToNewUser(peerId);
   });
 }
 
 function connectToNewUser(peerId) {
   const call = peer.call(peerId, localStream);
-  if(call) {
-    call.on('stream', remoteStream => showRemoteStream(remoteStream));
-    call.on('close', () => { /* remove video */ });
-  }
-  
+  if(call) call.on('stream', s => showRemoteStream(s));
   const conn = peer.connect(peerId, { reliable: true });
   setupConnection(peerId, call, conn);
 }
@@ -50,19 +45,16 @@ function connectToNewUser(peerId) {
 function setupConnection(peerId, call, conn) {
   if(connections[peerId]) return;
   connections[peerId] = { call, conn };
-  
   if(conn) {
-    conn.on('open', () => console.log("Data channel open with", peerId));
+    conn.on('open', () => console.log("Chat open"));
     conn.on('data', data => addMessage("Friend", data));
-    conn.on('close', () => delete connections[peerId]);
   }
 }
 
 function showRemoteStream(stream) {
   const remoteVideo = document.getElementById('remoteVideo');
-  if(!remoteVideo.srcObject) { // only set once
-    remoteVideo.srcObject = stream;
-  }
+  remoteVideo.srcObject = stream;
+  remoteVideo.play(); // iPhone needs this
 }
 
 function toggleChat() {
@@ -76,11 +68,7 @@ function sendChat() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
   if(msg === '') return;
-  
-  Object.values(connections).forEach(c => { 
-    if(c.conn && c.conn.open) c.conn.send(msg); 
-  });
-  
+  Object.values(connections).forEach(c => { if(c.conn?.open) c.conn.send(msg); });
   addMessage("You", msg);
   input.value = '';
 }
@@ -94,7 +82,6 @@ function addMessage(sender, text) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Keyboard lift
 document.getElementById('chatInput').addEventListener('focus', () => {
   document.getElementById('controls').style.bottom = '300px';
 });
@@ -106,5 +93,3 @@ function toggleMic() { localStream.getAudioTracks()[0].enabled =!localStream.get
 function toggleCam() { localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled; document.getElementById('camBtn').classList.toggle('active'); }
 function leave() { window.location.href = 'index.html'; }
 function copyRoom() { navigator.clipboard.writeText(window.location.href); alert("Link copied!"); }
-
-init();
