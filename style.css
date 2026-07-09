@@ -3,9 +3,9 @@
     body { background:#fff; color:#111; }
     header { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; position:sticky; top:0; background:#fff; z-index:10; border-bottom:1px solid #f3f4f6; }
   
-  /* BIGGER LOGO HERE */
-  .logo { font-weight:700; font-size:22px; color:#1a3dff; display:flex; align-items:center; gap:10px; cursor:pointer; }
-  .logo img { height:36px; width:36px; object-fit:contain; } /* was 24px */
+  /* BIG HEADER LOGO */
+  .logo { font-weight:700; font-size:24px; color:#1a3dff; display:flex; align-items:center; gap:12px; cursor:pointer; }
+  .logo img { height:42px; width:42px; object-fit:contain; }
   
   .nav-btns { display:flex; gap:12px; align-items:center; }
   .btn-join { background:none; border:none; color:#1a3dff; font-weight:600; font-size:15px; cursor:pointer; }
@@ -17,12 +17,12 @@
   .container p { color:#666; margin:16px 0 32px; font-size:16px; }
   .btns { display:flex; gap:12px; justify-content:center; margin-bottom:12px; flex-wrap:wrap; }
   
-  /* BIGGER BUTTON LOGO HERE */
+  /* BIG BUTTON LOGO */
   .btn-big { padding:14px 24px; border-radius:12px; font-weight:700; font-size:16px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; }
   .btn-blue { background:#2563eb; color:#fff; }
   .btn-gray { background:#f3f4f6; color:#111; }
-  .btn-big img { height:24px; width:24px; } /* was 18px */
-  .btn-blue img { filter:brightness(0) invert(1); } /* makes logo white on blue button */
+  .btn-big img { height:28px; width:28px; }
+  .btn-blue img { filter: none; } /* removed white invert so we can see the logo */
   
   .small { color:#888; font-size:13px; }
   .section { padding:60px 20px; text-align:center; }
