@@ -1,74 +1,77 @@
-const socket = io();
 const ROOM_ID = new URLSearchParams(window.location.search).get('room');
 document.getElementById('roomId').innerText = ROOM_ID;
-document.getElementById('roomIdTop').innerText = ROOM_ID;
 
 let localStream;
 let peer;
-let connections = {};
-let chatOpen = false;
+let conn;
+let isHost = false;
 
-async function startCall() {
-  document.getElementById('startScreen').style.display = 'none';
-  document.getElementById('roomInfo').style.display = 'flex';
-  document.getElementById('controls').style.display = 'flex';
-
+async function init() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video:true, audio:true });
     document.getElementById('localVideo').srcObject = localStream;
-  } catch(e) { alert("Please allow Camera and Microphone in Settings > Safari"); return; }
+  } catch(e) { alert("Allow Camera and Microphone"); }
 
-  peer = new Peer(undefined, { host: '0.peerjs.com', port: 443, path: '/' });
+  // Try to claim host ID first. If taken, we are guest
+  peer = new Peer(ROOM_ID + '-host', {
+    host: '0.peerjs.com', port: 443, path: '/'
+  });
 
-  peer.on('open', myPeerId => {
-    socket.emit('join-room', ROOM_ID, myPeerId);
+  peer.on('open', () => {
+    isHost = true;
+    console.log("I am HOST");
+  });
+
+  peer.on('error', () => {
+    // Host taken, join as guest
+    peer = new Peer(ROOM_ID + '-guest-' + Date.now(), {
+      host: '0.peerjs.com', port: 443, path: '/'
+    });
+    peer.on('open', id => {
+      console.log("I am GUEST:", id);
+      joinHost();
+    });
+  });
+
+  peer.on('connection', c => {
+    conn = c;
+    conn.on('data', data => addMessage("Friend", data));
   });
 
   peer.on('call', call => {
     call.answer(localStream);
-    call.on('stream', s => showRemoteStream(s));
-    setupConnection(call.peer, call);
-  });
-
-  socket.on('user-connected', peerId => {
-    connectToNewUser(peerId);
+    call.on('stream', s => document.getElementById('remoteVideo').srcObject = s);
   });
 }
 
-function connectToNewUser(peerId) {
-  const call = peer.call(peerId, localStream);
-  if(call) call.on('stream', s => showRemoteStream(s));
-  const conn = peer.connect(peerId, { reliable: true });
-  setupConnection(peerId, call, conn);
-}
-
-function setupConnection(peerId, call, conn) {
-  if(connections[peerId]) return;
-  connections[peerId] = { call, conn };
-  if(conn) {
-    conn.on('open', () => console.log("Chat open"));
-    conn.on('data', data => addMessage("Friend", data));
-  }
-}
-
-function showRemoteStream(stream) {
-  const remoteVideo = document.getElementById('remoteVideo');
-  remoteVideo.srcObject = stream;
-  remoteVideo.play(); // iPhone needs this
+function joinHost() {
+  conn = peer.connect(ROOM_ID + '-host', { reliable: true });
+  conn.on('open', () => console.log("Connected to host"));
+  conn.on('data', data => addMessage("Friend", data));
+  
+  const call = peer.call(ROOM_ID + '-host', localStream);
+  call.on('stream', s => document.getElementById('remoteVideo').srcObject = s);
 }
 
 function toggleChat() {
-  chatOpen =!chatOpen;
-  document.getElementById('chatPanel').style.display = chatOpen? 'flex' : 'none';
-  document.getElementById('controls').style.display = chatOpen? 'none' : 'flex';
-  if(chatOpen) setTimeout(() => document.getElementById('chatInput').focus(), 100);
+  const chat = document.getElementById('chatPanel');
+  const controls = document.getElementById('controls');
+  if(chat.style.display === 'flex') {
+    chat.style.display = 'none';
+    controls.style.display = 'flex';
+  } else {
+    chat.style.display = 'flex';
+    controls.style.display = 'none';
+    setTimeout(() => document.getElementById('chatInput').focus(), 100);
+  }
 }
 
 function sendChat() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
-  if(msg === '') return;
-  Object.values(connections).forEach(c => { if(c.conn?.open) c.conn.send(msg); });
+  if(msg === '' ||!conn ||!conn.open) return;
+  
+  conn.send(msg); // Send to the other person
   addMessage("You", msg);
   input.value = '';
 }
@@ -82,6 +85,7 @@ function addMessage(sender, text) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// Keyboard lift for iPhone
 document.getElementById('chatInput').addEventListener('focus', () => {
   document.getElementById('controls').style.bottom = '300px';
 });
@@ -89,7 +93,10 @@ document.getElementById('chatInput').addEventListener('blur', () => {
   document.getElementById('controls').style.bottom = '20px';
 });
 
+// Keep your existing mic, cam, leave, copy functions
 function toggleMic() { localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled; document.getElementById('micBtn').classList.toggle('active'); }
 function toggleCam() { localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled; document.getElementById('camBtn').classList.toggle('active'); }
 function leave() { window.location.href = 'index.html'; }
 function copyRoom() { navigator.clipboard.writeText(window.location.href); alert("Link copied!"); }
+
+init();
