@@ -6,15 +6,16 @@ let peer;
 let connections = {};
 let calls = {};
 let bigVideo = null;
+let myNumber = 1; // Host is 1
+let userCount = 1;
 const isHost = window.location.search.includes('host=1');
 
 async function init() {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 320, height: 240 }, // Small for 10 people
+      video: { width: 320, height: 320 }, // Square video
       audio: true
     });
-    document.getElementById('localVideo').srcObject = localStream;
   } catch(e) { alert("Allow Camera and Microphone"); }
 
   const myPeerId = isHost? ROOM_ID + '-host' : ROOM_ID + '-guest-' + Date.now();
@@ -25,7 +26,9 @@ async function init() {
   });
 
   peer.on('open', id => {
+    addVideoStream('local', localStream, myNumber);
     if(!isHost) setTimeout(() => joinRoom(), 1500);
+    if(isHost) broadcastUserCount();
   });
 
   peer.on('connection', c => {
@@ -36,11 +39,11 @@ async function init() {
   peer.on('call', call => {
     calls[call.peer] = call;
     call.answer(localStream);
-    call.on('stream', stream => addVideoStream(call.peer, stream));
-    call.on('close', () => { removeVideoStream(call.peer); });
+    call.on('stream', stream => {
+      const num = getNumberFromPeer(call.peer);
+      addVideoStream(call.peer, stream, num);
+    });
   });
-
-  peer.on('disconnected', () => peer.reconnect());
 }
 
 function joinRoom() {
@@ -51,32 +54,64 @@ function joinRoom() {
   c.on('open', () => {
     const call = peer.call(ROOM_ID + '-host', localStream);
     calls[ROOM_ID + '-host'] = call;
-    call.on('stream', stream => addVideoStream(ROOM_ID + '-host', stream));
+    call.on('stream', stream => {
+      const num = getNumberFromPeer(ROOM_ID + '-host');
+      addVideoStream(ROOM_ID + '-host', stream, num);
+    });
   });
 }
 
 function setupDataConn(c) {
   c.on('data', data => {
-    if(data.type === 'chat') addMessage(data.sender, data.msg);
+    if(data.type === 'chat') addMessage(data.num, data.msg);
+    if(data.type === 'userCount') {
+      userCount = data.count;
+      myNumber = data.count + 1;
+    }
+  });
+  c.on('open', () => {
+    if(isHost) {
+      userCount++;
+      broadcastUserCount();
+    }
   });
   c.on('close', () => delete connections[c.peer]);
 }
 
-function addVideoStream(peerId, stream) {
-  if(document.getElementById(peerId)) return;
+function broadcastUserCount() {
+  Object.values(connections).forEach(c => {
+    if(c.open) c.send({type: 'userCount', count: userCount});
+  });
+}
+
+function getNumberFromPeer(peerId) {
+  // Simple: assign number based on join order
+  const keys = Object.keys(calls);
+  return keys.indexOf(peerId) + 2; // Host=1, others start from 2
+}
+
+function addVideoStream(peerId, stream, number) {
+  if(document.getElementById('wrap-' + peerId)) return;
+  
+  const wrapper = document.createElement('div');
+  wrapper.id = 'wrap-' + peerId;
+  wrapper.className = 'video-wrapper';
+  wrapper.onclick = () => makeBig(peerId);
+
   const video = document.createElement('video');
   video.id = peerId;
   video.srcObject = stream;
   video.autoplay = true;
   video.playsInline = true;
-  video.onclick = () => makeBig(peerId);
-  document.getElementById('videos').appendChild(video);
-}
+  if(peerId === 'local') video.muted = true;
 
-function removeVideoStream(peerId) {
-  const video = document.getElementById(peerId);
-  if(video) video.remove();
-  delete calls[peerId];
+  const tag = document.createElement('div');
+  tag.className = 'name-tag';
+  tag.innerText = number;
+
+  wrapper.appendChild(video);
+  wrapper.appendChild(tag);
+  document.getElementById('videos').appendChild(wrapper);
 }
 
 function makeBig(peerId) {
@@ -90,7 +125,7 @@ function makeBig(peerId) {
   }
 }
 
-// Keep alive every 20s so video no stop
+// Keep alive
 setInterval(() => {
   Object.values(connections).forEach(c => {
     if(c.open) c.send({type: 'ping'});
@@ -101,15 +136,15 @@ function sendChat() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
   if(msg === '') return;
-  Object.values(connections).forEach(c => { if(c.open) c.send({type: 'chat', sender: 'You', msg: msg}); });
-  addMessage("You", msg);
+  Object.values(connections).forEach(c => { if(c.open) c.send({type: 'chat', num: myNumber, msg: msg}); });
+  addMessage(myNumber, msg);
   input.value = '';
 }
 
-function addMessage(sender, text) {
+function addMessage(num, text) {
   if(text === 'ping') return;
   const chatBox = document.getElementById('chatMessages');
-  chatBox.innerHTML += `<div class="msg"><b>${sender}:</b> ${text}</div>`;
+  chatBox.innerHTML += `<div class="msg"><b>${num}:</b> ${text}</div>`;
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
@@ -124,7 +159,7 @@ function toggleMic() {
   localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled;
   document.getElementById('micBtn').classList.toggle('active');
 }
-function toggleCam() { // Tap to switch to Voice Call
+function toggleCam() {
   localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled;
   document.getElementById('camBtn').classList.toggle('active');
 }
