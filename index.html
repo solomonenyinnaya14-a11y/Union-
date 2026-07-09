@@ -80,7 +80,7 @@
 <script>
 function startCall() {
   const roomId = Math.random().toString(36).substring(2, 8);
-  window.location.href = `room.html?room=${roomId}`;
+  window.location.href = `room.html?room=${roomId}&host=1`; // <-- ADDED &host=1
 }
 function joinCall() {
   const link = prompt("Paste the meeting link:");
