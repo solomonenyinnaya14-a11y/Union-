@@ -3,8 +3,7 @@ document.getElementById('roomId').innerText = ROOM_ID;
 
 let localStream;
 let peer;
-let conn = null; // only 1 connection for 1v1 call
-let myPeerId = '';
+let conn = null;
 
 async function init() {
   try {
@@ -12,9 +11,8 @@ async function init() {
     document.getElementById('localVideo').srcObject = localStream;
   } catch(e) { alert("Allow Camera and Microphone"); }
 
-  // Generate ID: if url has?host=1 then you are host
   const isHost = window.location.search.includes('host=1');
-  myPeerId = isHost? ROOM_ID + '-host' : ROOM_ID + '-guest-' + Date.now();
+  const myPeerId = isHost? ROOM_ID + '-host' : ROOM_ID + '-guest-' + Date.now();
 
   peer = new Peer(myPeerId, {
     host: '0.peerjs.com', port: 443, path: '/'
@@ -23,18 +21,16 @@ async function init() {
   peer.on('open', id => {
     console.log("My ID:", id);
     if(!isHost) {
-      // Guest: wait 1.5s then connect to host
-      setTimeout(() => joinHost(), 1500);
+      setTimeout(() => joinHost(), 1500); // Guest joins host
     }
   });
 
-  // If someone connects to us for chat
+  // When someone connects to us
   peer.on('connection', c => {
-    conn = c;
-    conn.on('data', data => addMessage("Friend", data));
+    conn = c; // SAVE IT
+    setupConn(c);
   });
 
-  // If someone calls us for video
   peer.on('call', call => {
     call.answer(localStream);
     call.on('stream', stream => {
@@ -44,19 +40,23 @@ async function init() {
 }
 
 function joinHost() {
-  conn = peer.connect(ROOM_ID + '-host', { reliable: true });
+  const c = peer.connect(ROOM_ID + '-host', { reliable: true });
+  conn = c; // <-- THIS WAS MISSING. Now we save it
+  setupConn(c);
 
-  conn.on('open', () => {
+  c.on('open', () => {
     console.log("Connected to host");
-    // Also call host for video
     const call = peer.call(ROOM_ID + '-host', localStream);
     call.on('stream', stream => {
       document.getElementById('remoteVideo').srcObject = stream;
     });
   });
+}
 
-  conn.on('data', data => addMessage("Friend", data));
-  conn.on('error', err => console.log(err));
+function setupConn(c) { // <-- NEW FUNCTION
+  c.on('data', data => addMessage("Friend", data));
+  c.on('close', () => conn = null);
+  c.on('error', err => console.log(err));
 }
 
 function toggleChat() {
@@ -78,7 +78,7 @@ function sendChat() {
   if(msg === '') return;
 
   if(conn && conn.open) {
-    conn.send(msg); // send to the other person
+    conn.send(msg); // Now this will work both ways
   } else {
     alert("Not connected yet. Wait 2 seconds.");
   }
@@ -101,14 +101,8 @@ document.getElementById('chatInput').addEventListener('blur', () => {
   document.getElementById('controls').style.bottom = '20px';
 });
 
-function toggleMic() {
-  localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled;
-  document.getElementById('micBtn').classList.toggle('active');
-}
-function toggleCam() {
-  localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled;
-  document.getElementById('camBtn').classList.toggle('active');
-}
+function toggleMic() { localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled; document.getElementById('micBtn').classList.toggle('active'); }
+function toggleCam() { localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled; document.getElementById('camBtn').classList.toggle('active'); }
 function leave() { window.location.href = 'index.html'; }
 function copyRoom() { navigator.clipboard.writeText(window.location.href); alert("Link copied!"); }
 
