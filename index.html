@@ -1,96 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Union - Meet Together. Build Together.</title>
-<style>
-/* ===== GLOBAL ===== */
-* { box-sizing: border-box; margin:0; padding:0; }
-body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
-
-/* BRAND COLORS */
-:root {
-  --navy: #1E3A8A;
-  --blue: #2563EB;
-  --gray: #f7f8fa;
-}
-
-/* ===== INDEX/LANDING PAGE ===== */
-.landing-body { background:var(--gray); color:#1a1a1a; overflow:auto; }
-
-nav { background:white; padding:12px 20px; display:flex; align-items:center; border-bottom:1px solid #eee; position:sticky; top:0; z-index:10; }
-
-/* LOGO STYLES */
-.logo { 
-  color:var(--navy); 
-  font-size:20px; 
-  font-weight:800; 
-  display:flex; 
-  align-items:center; 
-  gap:8px; 
-  cursor:pointer;
-}
-.logo img { 
-  height:32px; /* made it bigger */
-  width:auto; 
-  object-fit:contain; 
-}
-
-.nav-btns { margin-left:auto; display:flex; gap:10px; }
-.btn-join { background:transparent; border:none; color:var(--blue); font-weight:600; padding:8px 16px; cursor:pointer; font-size:16px; }
-.btn-start { background:var(--blue); color:white; border:none; padding:10px 20px; border-radius:50px; font-weight:700; cursor:pointer; font-size:16px; }
-  
-.hero { text-align:center; padding:60px 20px; background:var(--gray); }
-.hero h1 { font-size:42px; font-weight:800; line-height:1.2; }
-.hero h1 span { color:var(--blue); }
-.hero p { color:#5f6368; margin:16px 0 30px; font-size:16px; }
-.hero-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-.btn-primary { background:var(--blue); color:white; border:none; padding:14px 24px; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; }
-.btn-primary img { height:20px; width:20px; filter:brightness(0) invert(1); } /* logo white on button */
-.btn-secondary { background:white; color:var(--blue); border:1px solid #dadce0; padding:14px 24px; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; }
-.hero small { display:block; margin-top:16px; color:#5f6368; }
-
-.section { padding:60px 20px; text-align:center; background:white; }
-.section h2 { font-size:32px; margin-bottom:40px; font-weight:800; }
-.steps { display:grid; gap:30px; max-width:600px; margin:0 auto; }
-.step h3 { font-size:20px; margin:8px 0; }
-.step p { color:#5f6368; }
-  
-.features { display:grid; gap:20px; max-width:900px; margin:0 auto; }
-.card { background:white; border:1px solid #e0e0e0; border-radius:16px; padding:30px; }
-.card h3 { margin:10px 0; font-size:18px; }
-.card p { color:#5f6368; }
-
-footer { text-align:center; padding:30px 20px; color:#5f6368; background:var(--gray); }
-footer a { color:#1a1a1a; text-decoration:none; margin:0 10px; font-weight:600; }
-
-@media (max-width: 768px) {
-  .hero h1 { font-size:32px; }
-  .hero-btns { flex-direction:column; }
-  .btn-primary, .btn-secondary { width:100%; justify-content:center; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Union</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background:#fff; color:#111; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; position:sticky; top:0; background:#fff; z-index:10; border-bottom:1px solid #f3f4f6; }
+  .logo { font-weight:700; font-size:18px; color:#1a3dff; display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .logo img { height:24px; width:24px; object-fit:contain; }
+  .nav-btns { display:flex; gap:12px; align-items:center; }
+  .btn-join { background:none; border:none; color:#1a3dff; font-weight:600; font-size:15px; cursor:pointer; }
+  .btn-start { background:#2563eb; color:#fff; border:none; padding:10px 20px; border-radius:999px; font-weight:700; cursor:pointer; }
+  .container { max-width:700px; margin:0 auto; padding:40px 20px; text-align:center; }
+  .container h1 { font-size:36px; font-weight:800; line-height:1.2; }
+  .container h1.blue { color:#2563eb; }
+  .container p { color:#666; margin:16px 0 32px; font-size:16px; }
+  .btns { display:flex; gap:12px; justify-content:center; margin-bottom:12px; flex-wrap:wrap; }
+  .btn-big { padding:14px 24px; border-radius:12px; font-weight:700; font-size:16px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn-blue { background:#2563eb; color:#fff; }
+  .btn-gray { background:#f3f4f6; color:#111; }
+  .btn-big img { height:18px; width:18px; }
+  .btn-blue img { filter:brightness(0) invert(1); } /* makes logo white on blue button */
+  .small { color:#888; font-size:13px; }
+  .section { padding:60px 20px; text-align:center; }
+  .section h2 { font-size:28px; font-weight:800; margin-bottom:40px; }
+  .grid { display:grid; gap:20px; max-width:900px; margin:0 auto; }
+  .card { background:#fff; border:1px solid #eee; padding:24px; border-radius:16px; }
+  .card .icon { font-size:24px; margin-bottom:8px; }
+  .card h3 { font-size:18px; margin-bottom:6px; }
+  .card p { color:#666; font-size:14px; }
+    footer { text-align:center; padding:40px 20px; color:#888; font-size:14px; }
+    footer a { color:#111; text-decoration:none; margin:0 10px; font-weight:600; }
+    footer a:hover { text-decoration:underline; }
+   .page-content { max-width:800px; margin:0 auto; text-align:left; padding:40px 20px; }
+   .page-content h1 { font-size:32px; margin-bottom:20px; }
+   .page-content h3 { margin-top:24px; margin-bottom:8px; }
+   .page-content p { color:#555; line-height:1.7; margin-bottom:12px; }
+    @media(min-width:768px){.grid{ grid-template-columns:repeat(3,1fr)} }
+  </style>
 </head>
-<body class="landing-body">
+<body>
+  <header>
+    <div class="logo" onclick="showHome()">
+      <img src="logo.png" alt="Union Logo">
+      Union
+    </div>
+    <div class="nav-btns">
+      <button class="btn-join" onclick="joinCall()">Join</button>
+      <button class="btn-start" onclick="startCall()">Start a Call</button>
+    </div>
+  </header>
 
-<nav>
-  <div class="logo" onclick="showHome()">
-    <img src="logo.png" alt="Union Logo">
-    Union
-  </div>
-  <div class="nav-btns">
-    <button class="btn-join" onclick="joinCall()">Join</button>
-    <button class="btn-start" onclick="startCall()">Start a Call</button>
-  </div>
-</nav>
+  <div id="home">
+    <div class="container">
+      <h1>Meet Together.<br><span class="blue">Build Together.</span></h1>
+      <p>Start a video meeting in 1 click. No downloads, no accounts. Up to 10 people.</p>
+      <div class="btns">
+        <button class="btn-big btn-blue" onclick="startCall()">
+          <img src="logo.png" alt="">
+          Start a Call
+        </button>
+        <button class="btn-big btn-gray" onclick="joinCall()">🔗 Join a Call</button>
+      </div>
+      <p class="small">Free. Secure. Works in your browser.</p>
+    </div>
 
-<section class="hero">
-  <h1>Meet Together.<br><span>Build Together.</span></h1>
-  <p>Start a video meeting in 1 click. No downloads, no accounts. Up to 10 people.</p>
-  <div class="hero-btns">
-    <button class="btn-primary" onclick="startCall()">
-      <img src="logo.png" alt="">
-      Start a Call
-    </button>
-    <button class="btn
+    <div class="section" style="background:#f9fafb;">
+      <h2>Start meeting in 3 seconds</h2>
+      <div class="grid">
+        <div><div style="font-size:24px; font-weight:700;">1</div><h3>Click Start</h3><p>Create a meeting room instantly</p></div>
+        <div><div style="font-size:24px; font-weight:700;">2</div><h3>Share Link</h3><p>Copy the link and send to anyone</p></div>
+        <div><div style="font-size:24px; font-weight:700;">3</div><h3>Join</h3><p>Up to 10 people can join</p></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Everything you need</h2>
+      <div class="grid">
+        <div class="card"><div class="icon">📹</div><h3>HD Video & Audio</h3><p>Crystal clear 720p video and audio</p></div>
+        <div class="card"><div class="icon">👥</div><h3>10 People</h3><p>Group calls for your whole team</p></div>
+        <div class="card"><div class="icon">🔗</div><h3>One Link Join</h3><p>No downloads. Just click the link.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="privacy" class="page-content" style="display:none;">
+    <h1>Privacy Policy</h1>
+    <p>Last updated: April 2026</p>
+    <h3>1. What we collect</h3>
+    <p>Union does not store your video or audio. Calls are peer-to-peer and encrypted. We only collect your room ID to connect people.</p>
+    <h3>2. Camera & Microphone</h3>
+    <p>We only access your camera and microphone when you click "Start a Call". Nothing is recorded or saved.</p>
+    <h3>3. Contact</h3>
+    <p>For privacy questions email: privacy@joinunion.vercel.app</p>
+    <button class="btn-big btn-gray" onclick="showHome()" style="margin-top:20px;">← Back to Home</button>
+  </div>
+
+  <div id="terms" class="page-content" style="display:none;">
+    <h1>Terms of Service</h1>
+    <p>Last updated: April 2026</p>
+    <h3>1. Use of Service</h3>
+    <p>Union is provided free for personal and team use. Don't use it for illegal activity.</p>
+    <h3>2. No Recording</h3>
+    <p>You are responsible for getting permission before recording any call.</p>
+    <h3>3. Service Changes</h3>
+    <p>We may update Union at any time to improve the service.</p>
+    <button class="btn-big btn-gray" onclick="showHome()" style="margin-top:20px;">← Back to Home</button>
+  </div>
+
+  <div id="contact" class="page-content" style="display:none;">
+    <h1>Contact Us</h1>
+    <p>Got questions or feedback? We'd love to hear from you.</p>
+    <h3>Email</h3>
+    <p>support@joinunion.vercel.app</p>
+    <h3>Built by</h3>
+    <p>Union Team - Port Harcourt, Nigeria</p>
+    <button class="btn-big btn-gray" onclick="showHome()" style="margin-top:20px;">← Back to Home</button>
+  </div>
+
+  <footer>
+    <p>© 2026 Union. Built for teams and friends.</p>
+    <div style="margin-top:12px;">
+      <a href="#" onclick="showPage('privacy')">Privacy</a> 
+      <a href="#" onclick="showPage('terms')">Terms</a> 
+      <a href="#" onclick="showPage('contact')">Contact</a>
+    </div>
+  </footer>
+
+<script>
+function startCall() {
+  const roomId = Math.random().toString(36).substring(2, 8);
+  window.location.href = `room.html?room=${roomId}&host=1`;
+}
+
+function joinCall() {
+  const link = prompt("Paste the meeting link:");
+  if(link) window.location.href = link;
+}
+
+function showPage(page) {
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('privacy').style.display = 'none';
+  document.getElementById('terms').style.display = 'none';
+  document.getElementById('contact').style.display = 'none';
+  document.getElementById(page).style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function showHome() {
+  document.getElementById('home').style.display = 'block';
+  document.getElementById('privacy').style.display = 'none';
+  document.getElementById('terms').style.display = 'none';
+  document.getElementById('contact').style.display = 'none';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
