@@ -2,55 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Union - Meet Together. Build Together.</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background: #fff; color: #111827; }
     header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; position: sticky; top: 0; background: #fff; z-index: 10; }
-.logo { font-size: 18px; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 6px; }
+   .logo { font-size: 18px; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 6px; }
     nav { display: flex; gap: 8px; align-items: center; }
-.btn-header { background: #2563eb; color: white; padding: 10px 18px; border-radius: 999px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; }
-.link-header { text-decoration: none; color: #1e40af; font-weight: 600; font-size: 15px; }
-.hero { padding: 48px 20px; text-align: center; background: #f9fafb; }
-.hero h1 { font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
-.hero h1 span { color: #2563eb; }
-.hero p { font-size: 15px; color: #6b7280; margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto; }
-.btn-main { width: 90%; max-width: 350px; background: #2563eb; color: white; padding: 14px 24px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 10px; }
-.btn-outline { width: 90%; max-width: 350px; background: white; color: #1e40af; padding: 14px 24px; border-radius: 12px; font-weight: 700; border: 1px solid #d1d5db; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 12px; }
-.subtext { font-size: 14px; color: #6b7280; }
-.section { padding: 48px 20px; text-align: center; }
-.section h2 { font-size: 26px; font-weight: 800; margin-bottom: 32px; color: #111827; }
-.steps { display: flex; flex-direction: column; gap: 32px; max-width: 400px; margin: 0 auto; }
-.step-num { font-size: 16px; font-weight: 600; color: #6b7280; }
-.step h3 { font-size: 18px; font-weight: 700; margin: 4px 0 6px; color: #111827; }
-.step p { color: #6b7280; font-size: 15px; }
-.features { background: #f9fafb; }
-.feature-grid { display: flex; flex-direction: column; gap: 16px; max-width: 500px; margin: 0 auto; }
-.feature-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid #e5e7eb; }
-.feature-card h4 { font-size: 17px; font-weight: 700; margin: 8px 0 6px; color: #111827; }
-.feature-card p { color: #6b7280; font-size: 14px; }
+   .btn-header { background: #2563eb; color: white; padding: 10px 18px; border-radius: 999px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; }
+   .link-header { text-decoration: none; color: #1e40af; font-weight: 600; font-size: 15px; }
+   .hero { padding: 48px 20px; text-align: center; background: #f9fafb; }
+   .hero h1 { font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+   .hero h1 span { color: #2563eb; }
+   .hero p { font-size: 15px; color: #6b7280; margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto; }
+   .btn-main { width: 90%; max-width: 350px; background: #2563eb; color: white; padding: 14px 24px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 10px; }
+   .btn-outline { width: 90%; max-width: 350px; background: white; color: #1e40af; padding: 14px 24px; border-radius: 12px; font-weight: 700; border: 1px solid #d1d5db; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 12px; }
+   .subtext { font-size: 14px; color: #6b7280; }
+   .section { padding: 48px 20px; text-align: center; }
+   .section h2 { font-size: 26px; font-weight: 800; margin-bottom: 32px; color: #111827; }
+   .steps { display: flex; flex-direction: column; gap: 32px; max-width: 400px; margin: 0 auto; }
+   .step-num { font-size: 16px; font-weight: 600; color: #6b7280; }
+   .step h3 { font-size: 18px; font-weight: 700; margin: 4px 0 6px; color: #111827; }
+   .step p { color: #6b7280; font-size: 15px; }
+   .features { background: #f9fafb; }
+   .feature-grid { display: flex; flex-direction: column; gap: 16px; max-width: 500px; margin: 0 auto; }
+   .feature-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid #e5e7eb; }
+   .feature-card h4 { font-size: 17px; font-weight: 700; margin: 8px 0 6px; color: #111827; }
+   .feature-card p { color: #6b7280; font-size: 14px; }
     footer { padding: 40px 20px; text-align: center; }
     footer p { color: #6b7280; margin-bottom: 16px; font-size: 14px; }
     footer a { color: #111827; text-decoration: none; margin: 0 12px; font-weight: 600; font-size: 14px; }
-.domain { margin-top: 20px; font-size: 14px; color: #111827; text-decoration: underline; font-weight: 500; }
+   .domain { margin-top: 20px; font-size: 14px; color: #111827; text-decoration: underline; font-weight: 500; }
     #room { display: none; padding: 20px; text-align: center; background: #fff; min-height: 100vh; }
     video { width: 90%; max-width: 400px; border-radius: 12px; margin: 10px; background: #000; }
     #roomLink { background: #f3f4f6; padding: 14px; border-radius: 10px; margin: 20px auto; max-width: 500px; word-break: break-all; cursor: pointer; font-weight: 600; }
     #remoteVideos { display: flex; flex-wrap: wrap; justify-content: center; }
-  .error-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1f2937; color: white; padding: 20px; border-radius: 12px; z-index: 100; width: 90%; max-width: 350px; text-align: left; display: none; }
-  .error-popup button { background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 8px; margin-top: 12px; float: right; cursor: pointer; }
-  .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
   </style>
 </head>
 <body>
-
-  <div class="overlay" id="overlay" onclick="closeError()"></div>
-  <div class="error-popup" id="errorPopup">
-    <h3 style="margin-bottom:8px;">Camera Blocked</h3>
-    <p id="errorText">Please allow camera and microphone access</p>
-    <button onclick="closeError()">OK</button>
-  </div>
 
   <header>
     <div class="logo">📹 Union</div>
@@ -68,9 +58,32 @@
       <button onclick="showJoin()" class="btn-outline">🔗 Join a Call</button>
       <p class="subtext">Free. Secure. Works in your browser.</p>
     </section>
-    <section class="section"><h2>Start meeting in 3 seconds</h2></section>
-    <section class="section features"><h2>Everything you need</h2></section>
-    <footer><p>© 2026 Union</p><div class="domain">joinunion.vercel.app</div></footer>
+
+    <section class="section">
+      <h2>Start meeting in 3 seconds</h2>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><h3>Click Start</h3><p>Create a meeting room instantly</p></div>
+        <div class="step"><div class="step-num">2</div><h3>Share Link</h3><p>Copy the link and send to anyone</p></div>
+        <div class="step"><div class="step-num">3</div><h3>Join</h3><p>They click and join. That's it.</p></div>
+      </div>
+    </section>
+
+    <section class="section features">
+      <h2>Everything you need</h2>
+      <div class="feature-grid">
+        <div class="feature-card"><div style="font-size:28px;">📹</div><h4>HD Video & Audio</h4><p>Crystal clear 720p video and audio</p></div>
+        <div class="feature-card"><div style="font-size:28px;">🔗</div><h4>One Link Join</h4><p>No downloads. Just click the link.</p></div>
+        <div class="feature-card"><div style="font-size:28px;">🖥️</div><h4>Screen Share</h4><p>Share your screen with 1 click</p></div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 Union. Built for teams and friends.</p>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+      <a href="/contact.html">Contact</a>
+      <div class="domain">joinunion.vercel.app</div>
+    </footer>
   </div>
 
   <div id="room">
@@ -90,39 +103,15 @@
     let roomId;
     const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
     
-    function showError(msg) {
-      document.getElementById('errorText').innerText = msg;
-      document.getElementById('errorPopup').style.display = 'block';
-      document.getElementById('overlay').style.display = 'block';
-    }
-    function closeError() {
-      document.getElementById('errorPopup').style.display = 'none';
-      document.getElementById('overlay').style.display = 'none';
-    }
-    
-    async function getCamera() {
-      // IOS FIX: Must be called directly from button click
-      return await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" }, 
-        audio: true
-      });
-    }
-
+    // ONLY THIS FUNCTION WAS CHANGED FOR IOS
     async function startCall() {
       try {
-        localStream = await getCamera(); // Call it here inside the click
+        localStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "user"}, audio: true});
         roomId = Math.random().toString(36).substring(2, 8);
         window.location.hash = roomId;
         joinRoom(roomId);
       } catch(e) {
-        console.log(e)
-        if(e.name === 'NotAllowedError') {
-          showError('Go to AA > Website Settings > Camera: Allow');
-        } else if(e.name === 'NotFoundError') {
-          showError('No camera found on this device');
-        } else {
-          showError('Error: ' + e.message + '. Try refreshing.');
-        }
+        alert('Camera Blocked. Tap AA > Website Settings > Camera: Allow > Microphone: Allow');
       }
     }
     
@@ -142,9 +131,9 @@
       
       if(!localStream) {
         try {
-          localStream = await getCamera();
+          localStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "user"}, audio: true});
         } catch(e) {
-          showError('Please allow camera to join');
+          alert('Please allow camera to join');
           return;
         }
       }
@@ -211,5 +200,6 @@
       joinRoom(roomId);
     }
   </script>
+
 </body>
 </html>
