@@ -5,10 +5,15 @@ document.getElementById('roomId').innerText = ROOM_ID;
 const videosGrid = document.getElementById('videos');
 const myVideo = document.createElement('video');
 myVideo.muted = true;
+myVideo.playsInline = true; // IMPORTANT FOR IPHONE
 const peers = {};
 
-// 1. TURN/STUN SERVERS - THIS FIXES BLACK SCREEN ON IPHONE
+// PEERJS WITH TURN SERVER - IPHONE FIX
 const peer = new Peer(undefined, {
+  host: window.location.hostname,
+  port: window.location.port || (window.location.protocol === 'https:'? 443 : 80),
+  path: '/peerjs',
+  secure: true,
   config: {
     iceServers: [
       { urls: "stun:stun.l.google.com:19302" },
@@ -27,22 +32,24 @@ const peer = new Peer(undefined, {
   }
 });
 
-const socket = io();
+peer.on('error', err => console.error('PEER ERROR:', err));
 
+const socket = io();
 let myStream;
 
-// 2. GET CAMERA + MIC
+// GET CAMERA + MIC
 navigator.mediaDevices.getUserMedia({
-  video: { width: 640, height: 640 }, // square for your grid
+  video: { width: 640, height: 640, facingMode: "user" },
   audio: true
 }).then(stream => {
   myStream = stream;
   addVideoStream(myVideo, stream, 'You');
 
-  // 3. ANSWER CALLS FROM OTHERS
+  // ANSWER CALLS FROM OTHERS
   peer.on('call', call => {
     call.answer(stream);
     const video = document.createElement('video');
+    video.playsInline = true; // IMPORTANT FOR IPHONE
     call.on('stream', userVideoStream => {
       addVideoStream(video, userVideoStream, call.peer);
     });
@@ -50,11 +57,13 @@ navigator.mediaDevices.getUserMedia({
     peers[call.peer] = call;
   });
 
-  // 4. JOIN ROOM
+  // JOIN ROOM
   socket.emit('join-room', ROOM_ID, peer.id);
+}).catch(err => {
+  alert("Camera/Mic permission denied: " + err.message);
 });
 
-// 5. CALL NEW USERS WHO JOIN
+// CALL NEW USERS WHO JOIN
 socket.on('user-connected', userId => {
   setTimeout(() => connectToNewUser(userId, myStream), 1000);
 });
@@ -62,6 +71,7 @@ socket.on('user-connected', userId => {
 function connectToNewUser(userId, stream) {
   const call = peer.call(userId, stream);
   const video = document.createElement('video');
+  video.playsInline = true; // IMPORTANT FOR IPHONE
   call.on('stream', userVideoStream => {
     addVideoStream(video, userVideoStream, userId);
   });
@@ -73,7 +83,7 @@ socket.on('user-disconnected', userId => {
   if (peers[userId]) peers[userId].close();
 });
 
-// 6. ADD VIDEO TO GRID
+// ADD VIDEO TO GRID
 function addVideoStream(video, stream, name) {
   video.srcObject = stream;
   video.addEventListener('loadedmetadata', () => {
@@ -88,7 +98,7 @@ function addVideoStream(video, stream, name) {
   videosGrid.append(wrapper);
 }
 
-// 7. CONTROLS
+// CONTROLS
 function toggleMic() {
   const btn = document.getElementById('micBtn');
   myStream.getAudioTracks()[0].enabled =!myStream.getAudioTracks()[0].enabled;
@@ -107,13 +117,13 @@ function leave() {
   window.location.href = '/';
 }
 
-// 8. COPY ROOM LINK
+// COPY ROOM LINK
 function copyRoom() {
   navigator.clipboard.writeText(window.location.href);
   alert('Room link copied!');
 }
 
-// 9. CHAT
+// CHAT
 function toggleChat() {
   const panel = document.getElementById('chatPanel');
   panel.style.display = panel.style.display === 'flex'? 'none' : 'flex';
