@@ -1,174 +1,142 @@
-const ROOM_ID = new URLSearchParams(window.location.search).get('room');
+const urlParams = new URLSearchParams(window.location.search);
+const ROOM_ID = urlParams.get('room');
 document.getElementById('roomId').innerText = ROOM_ID;
 
-let localStream;
-let peer;
-let connections = {};
-let calls = {};
-let bigVideo = null;
-let myNumber = 1; // Host is 1
-let userCount = 1;
-const isHost = window.location.search.includes('host=1');
+const videosGrid = document.getElementById('videos');
+const myVideo = document.createElement('video');
+myVideo.muted = true;
+const peers = {};
 
-async function init() {
-  try {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 320, height: 320 }, // Square video
-      audio: true
-    });
-  } catch(e) { alert("Allow Camera and Microphone"); }
-
-  const myPeerId = isHost? ROOM_ID + '-host' : ROOM_ID + '-guest-' + Date.now();
-
-  peer = new Peer(myPeerId, {
-    host: '0.peerjs.com', port: 443, path: '/',
-    config: { 'iceServers': [ { urls: 'stun:stun.l.google.com:19302' } ] }
-  });
-
-  peer.on('open', id => {
-    addVideoStream('local', localStream, myNumber);
-    if(!isHost) setTimeout(() => joinRoom(), 1500);
-    if(isHost) broadcastUserCount();
-  });
-
-  peer.on('connection', c => {
-    connections[c.peer] = c;
-    setupDataConn(c);
-  });
-
-  peer.on('call', call => {
-    calls[call.peer] = call;
-    call.answer(localStream);
-    call.on('stream', stream => {
-      const num = getNumberFromPeer(call.peer);
-      addVideoStream(call.peer, stream, num);
-    });
-  });
-}
-
-function joinRoom() {
-  const c = peer.connect(ROOM_ID + '-host', { reliable: true });
-  connections[ROOM_ID + '-host'] = c;
-  setupDataConn(c);
-
-  c.on('open', () => {
-    const call = peer.call(ROOM_ID + '-host', localStream);
-    calls[ROOM_ID + '-host'] = call;
-    call.on('stream', stream => {
-      const num = getNumberFromPeer(ROOM_ID + '-host');
-      addVideoStream(ROOM_ID + '-host', stream, num);
-    });
-  });
-}
-
-function setupDataConn(c) {
-  c.on('data', data => {
-    if(data.type === 'chat') addMessage(data.num, data.msg);
-    if(data.type === 'userCount') {
-      userCount = data.count;
-      myNumber = data.count + 1;
-    }
-  });
-  c.on('open', () => {
-    if(isHost) {
-      userCount++;
-      broadcastUserCount();
-    }
-  });
-  c.on('close', () => delete connections[c.peer]);
-}
-
-function broadcastUserCount() {
-  Object.values(connections).forEach(c => {
-    if(c.open) c.send({type: 'userCount', count: userCount});
-  });
-}
-
-function getNumberFromPeer(peerId) {
-  // Simple: assign number based on join order
-  const keys = Object.keys(calls);
-  return keys.indexOf(peerId) + 2; // Host=1, others start from 2
-}
-
-function addVideoStream(peerId, stream, number) {
-  if(document.getElementById('wrap-' + peerId)) return;
-  
-  const wrapper = document.createElement('div');
-  wrapper.id = 'wrap-' + peerId;
-  wrapper.className = 'video-wrapper';
-  wrapper.onclick = () => makeBig(peerId);
-
-  const video = document.createElement('video');
-  video.id = peerId;
-  video.srcObject = stream;
-  video.autoplay = true;
-  video.playsInline = true;
-  if(peerId === 'local') video.muted = true;
-
-  const tag = document.createElement('div');
-  tag.className = 'name-tag';
-  tag.innerText = number;
-
-  wrapper.appendChild(video);
-  wrapper.appendChild(tag);
-  document.getElementById('videos').appendChild(wrapper);
-}
-
-function makeBig(peerId) {
-  const videos = document.getElementById('videos');
-  if(bigVideo === peerId) {
-    videos.style.gridTemplateColumns = 'repeat(3, 1fr)';
-    bigVideo = null;
-  } else {
-    videos.style.gridTemplateColumns = '1fr';
-    bigVideo = peerId;
+// 1. TURN/STUN SERVERS - THIS FIXES BLACK SCREEN ON IPHONE
+const peer = new Peer(undefined, {
+  config: {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      { 
+        urls: "turn:openrelay.metered.ca:80",
+        username: "openrelayproject",
+        credential: "openrelayproject"
+      },
+      { 
+        urls: "turn:openrelay.metered.ca:443",
+        username: "openrelayproject", 
+        credential: "openrelayproject"
+      }
+    ]
   }
+});
+
+const socket = io();
+
+let myStream;
+
+// 2. GET CAMERA + MIC
+navigator.mediaDevices.getUserMedia({
+  video: { width: 640, height: 640 }, // square for your grid
+  audio: true
+}).then(stream => {
+  myStream = stream;
+  addVideoStream(myVideo, stream, 'You');
+
+  // 3. ANSWER CALLS FROM OTHERS
+  peer.on('call', call => {
+    call.answer(stream);
+    const video = document.createElement('video');
+    call.on('stream', userVideoStream => {
+      addVideoStream(video, userVideoStream, call.peer);
+    });
+    call.on('close', () => video.parentElement.remove());
+    peers[call.peer] = call;
+  });
+
+  // 4. JOIN ROOM
+  socket.emit('join-room', ROOM_ID, peer.id);
+});
+
+// 5. CALL NEW USERS WHO JOIN
+socket.on('user-connected', userId => {
+  setTimeout(() => connectToNewUser(userId, myStream), 1000);
+});
+
+function connectToNewUser(userId, stream) {
+  const call = peer.call(userId, stream);
+  const video = document.createElement('video');
+  call.on('stream', userVideoStream => {
+    addVideoStream(video, userVideoStream, userId);
+  });
+  call.on('close', () => video.parentElement.remove());
+  peers[userId] = call;
 }
 
-// Keep alive
-setInterval(() => {
-  Object.values(connections).forEach(c => {
-    if(c.open) c.send({type: 'ping'});
+socket.on('user-disconnected', userId => {
+  if (peers[userId]) peers[userId].close();
+});
+
+// 6. ADD VIDEO TO GRID
+function addVideoStream(video, stream, name) {
+  video.srcObject = stream;
+  video.addEventListener('loadedmetadata', () => {
+    video.play();
   });
-}, 20000);
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('video-wrapper');
+  const nameTag = document.createElement('div');
+  nameTag.classList.add('name-tag');
+  nameTag.innerText = name;
+  wrapper.append(video, nameTag);
+  videosGrid.append(wrapper);
+}
+
+// 7. CONTROLS
+function toggleMic() {
+  const btn = document.getElementById('micBtn');
+  myStream.getAudioTracks()[0].enabled =!myStream.getAudioTracks()[0].enabled;
+  btn.classList.toggle('active');
+  btn.innerText = myStream.getAudioTracks()[0].enabled? '🎤' : '🔇';
+}
+
+function toggleCam() {
+  const btn = document.getElementById('camBtn');
+  myStream.getVideoTracks()[0].enabled =!myStream.getVideoTracks()[0].enabled;
+  btn.classList.toggle('active');
+  btn.innerText = myStream.getVideoTracks()[0].enabled? '📹' : '🚫';
+}
+
+function leave() {
+  window.location.href = '/';
+}
+
+// 8. COPY ROOM LINK
+function copyRoom() {
+  navigator.clipboard.writeText(window.location.href);
+  alert('Room link copied!');
+}
+
+// 9. CHAT
+function toggleChat() {
+  const panel = document.getElementById('chatPanel');
+  panel.style.display = panel.style.display === 'flex'? 'none' : 'flex';
+}
 
 function sendChat() {
   const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if(msg === '') return;
-  Object.values(connections).forEach(c => { if(c.open) c.send({type: 'chat', num: myNumber, msg: msg}); });
-  addMessage(myNumber, msg);
+  if (input.value.trim() === '') return;
+  addMessage('You', input.value);
+  socket.emit('chat', ROOM_ID, input.value);
   input.value = '';
 }
 
-function addMessage(num, text) {
-  if(text === 'ping') return;
-  const chatBox = document.getElementById('chatMessages');
-  chatBox.innerHTML += `<div class="msg"><b>${num}:</b> ${text}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
+socket.on('chat', (name, msg) => addMessage(name, msg));
+
+function addMessage(name, msg) {
+  const div = document.createElement('div');
+  div.classList.add('msg');
+  div.innerHTML = `<b>${name}:</b> ${msg}`;
+  document.getElementById('chatMessages').append(div);
+  document.getElementById('chatMessages').scrollTop = 99999;
 }
 
-document.getElementById('chatInput').addEventListener('focus', () => {
-  document.getElementById('controls').style.bottom = '300px';
+document.getElementById('chatInput').addEventListener('keypress', e => {
+  if(e.key === 'Enter') sendChat();
 });
-document.getElementById('chatInput').addEventListener('blur', () => {
-  document.getElementById('controls').style.bottom = '15px';
-});
-
-function toggleMic() {
-  localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled;
-  document.getElementById('micBtn').classList.toggle('active');
-}
-function toggleCam() {
-  localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled;
-  document.getElementById('camBtn').classList.toggle('active');
-}
-function toggleChat() {
-  const chat = document.getElementById('chatPanel');
-  chat.style.display = chat.style.display === 'flex'? 'none' : 'flex';
-  document.getElementById('controls').style.display = chat.style.display === 'flex'? 'none' : 'flex';
-}
-function leave() { window.location.href = 'index.html'; }
-function copyRoom() { navigator.clipboard.writeText(window.location.href); alert("Link copied!"); }
-
-init();
