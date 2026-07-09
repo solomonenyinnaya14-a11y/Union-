@@ -3,203 +3,150 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Union - Meet Together. Build Together.</title>
+  <title>Union</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: #fff; color: #111827; }
-    header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; position: sticky; top: 0; background: #fff; z-index: 10; }
-   .logo { font-size: 18px; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 6px; }
-    nav { display: flex; gap: 8px; align-items: center; }
-   .btn-header { background: #2563eb; color: white; padding: 10px 18px; border-radius: 999px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; }
-   .link-header { text-decoration: none; color: #1e40af; font-weight: 600; font-size: 15px; }
-   .hero { padding: 48px 20px; text-align: center; background: #f9fafb; }
-   .hero h1 { font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
-   .hero h1 span { color: #2563eb; }
-   .hero p { font-size: 15px; color: #6b7280; margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto; }
-   .btn-main { width: 90%; max-width: 350px; background: #2563eb; color: white; padding: 14px 24px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 10px; }
-   .btn-outline { width: 90%; max-width: 350px; background: white; color: #1e40af; padding: 14px 24px; border-radius: 12px; font-weight: 700; border: 1px solid #d1d5db; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 12px; }
-   .subtext { font-size: 14px; color: #6b7280; }
-   .section { padding: 48px 20px; text-align: center; }
-   .section h2 { font-size: 26px; font-weight: 800; margin-bottom: 32px; color: #111827; }
-   .steps { display: flex; flex-direction: column; gap: 32px; max-width: 400px; margin: 0 auto; }
-   .step-num { font-size: 16px; font-weight: 600; color: #6b7280; }
-   .step h3 { font-size: 18px; font-weight: 700; margin: 4px 0 6px; color: #111827; }
-   .step p { color: #6b7280; font-size: 15px; }
-   .features { background: #f9fafb; }
-   .feature-grid { display: flex; flex-direction: column; gap: 16px; max-width: 500px; margin: 0 auto; }
-   .feature-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid #e5e7eb; }
-   .feature-card h4 { font-size: 17px; font-weight: 700; margin: 8px 0 6px; color: #111827; }
-   .feature-card p { color: #6b7280; font-size: 14px; }
-    footer { padding: 40px 20px; text-align: center; }
-    footer p { color: #6b7280; margin-bottom: 16px; font-size: 14px; }
-    footer a { color: #111827; text-decoration: none; margin: 0 12px; font-weight: 600; font-size: 14px; }
-   .domain { margin-top: 20px; font-size: 14px; color: #111827; text-decoration: underline; font-weight: 500; }
-    #room { display: none; padding: 20px; text-align: center; background: #fff; min-height: 100vh; }
-    video { width: 90%; max-width: 400px; border-radius: 12px; margin: 10px; background: #000; }
-    #roomLink { background: #f3f4f6; padding: 14px; border-radius: 10px; margin: 20px auto; max-width: 500px; word-break: break-all; cursor: pointer; font-weight: 600; }
-    #remoteVideos { display: flex; flex-wrap: wrap; justify-content: center; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background:#fff; color:#111; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:16px 20px; position:sticky; top:0; background:#fff; z-index:10; border-bottom:1px solid #f3f4f6; }
+  .logo { font-weight:700; font-size:18px; color:#1a3dff; display:flex; align-items:center; gap:6px; }
+  .nav-btns { display:flex; gap:12px; align-items:center; }
+  .btn-join { background:none; border:none; color:#1a3dff; font-weight:600; font-size:15px; cursor:pointer; }
+  .btn-start { background:#2563eb; color:#fff; border:none; padding:10px 20px; border-radius:999px; font-weight:700; cursor:pointer; }
+  .container { max-width:700px; margin:0 auto; padding:40px 20px; text-align:center; }
+  .container h1 { font-size:36px; font-weight:800; line-height:1.2; }
+  .container h1.blue { color:#2563eb; }
+  .container p { color:#666; margin:16px 0 32px; font-size:16px; }
+  .btns { display:flex; gap:12px; justify-content:center; margin-bottom:12px; flex-wrap:wrap; }
+  .btn-big { padding:14px 24px; border-radius:12px; font-weight:700; font-size:16px; border:none; cursor:pointer; }
+  .btn-blue { background:#2563eb; color:#fff; }
+  .btn-gray { background:#f3f4f6; color:#111; }
+  .small { color:#888; font-size:13px; }
+  .section { padding:60px 20px; text-align:center; }
+  .section h2 { font-size:28px; font-weight:800; margin-bottom:40px; }
+  .grid { display:grid; gap:20px; max-width:900px; margin:0 auto; }
+  .card { background:#fff; border:1px solid #eee; padding:24px; border-radius:16px; }
+  .card .icon { font-size:24px; margin-bottom:8px; }
+  .card h3 { font-size:18px; margin-bottom:6px; }
+  .card p { color:#666; font-size:14px; }
+    footer { text-align:center; padding:40px 20px; color:#888; font-size:14px; }
+    footer a { color:#111; text-decoration:none; margin:0 10px; font-weight:600; }
+    footer a:hover { text-decoration:underline; }
+   .page-content { max-width:800px; margin:0 auto; text-align:left; padding:40px 20px; }
+   .page-content h1 { font-size:32px; margin-bottom:20px; }
+   .page-content h3 { margin-top:24px; margin-bottom:8px; }
+   .page-content p { color:#555; line-height:1.7; margin-bottom:12px; }
+    @media(min-width:768px){.grid{ grid-template-columns:repeat(3,1fr)} }
   </style>
 </head>
 <body>
-
   <header>
-    <div class="logo">📹 Union</div>
-    <nav>
-      <a href="#" onclick="showJoin()" class="link-header">Join</a>
-      <button onclick="startCall()" class="btn-header">Start a Call</button>
-    </nav>
+    <div class="logo" onclick="showHome()" style="cursor:pointer;">📹 Union</div>
+    <div class="nav-btns">
+      <button class="btn-join" onclick="joinCall()">Join</button>
+      <button class="btn-start" onclick="startCall()">Start a Call</button>
+    </div>
   </header>
 
   <div id="home">
-    <section class="hero">
-      <h1>Meet Together.<br><span>Build Together.</span></h1>
-      <p>Start a video meeting in 1 click. No downloads, no accounts.</p>
-      <button onclick="startCall()" class="btn-main">📹 Start a Call</button>
-      <button onclick="showJoin()" class="btn-outline">🔗 Join a Call</button>
-      <p class="subtext">Free. Secure. Works in your browser.</p>
-    </section>
+    <div class="container">
+      <h1>Meet Together.<br><span class="blue">Build Together.</span></h1>
+      <p>Start a video meeting in 1 click. No downloads, no accounts. Up to 10 people.</p>
+      <div class="btns">
+        <button class="btn-big btn-blue" onclick="startCall()">📹 Start a Call</button>
+        <button class="btn-big btn-gray" onclick="joinCall()">🔗 Join a Call</button>
+      </div>
+      <p class="small">Free. Secure. Works in your browser.</p>
+    </div>
 
-    <section class="section">
+    <div class="section" style="background:#f9fafb;">
       <h2>Start meeting in 3 seconds</h2>
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><h3>Click Start</h3><p>Create a meeting room instantly</p></div>
-        <div class="step"><div class="step-num">2</div><h3>Share Link</h3><p>Copy the link and send to anyone</p></div>
-        <div class="step"><div class="step-num">3</div><h3>Join</h3><p>They click and join. That's it.</p></div>
+      <div class="grid">
+        <div><div style="font-size:24px; font-weight:700;">1</div><h3>Click Start</h3><p>Create a meeting room instantly</p></div>
+        <div><div style="font-size:24px; font-weight:700;">2</div><h3>Share Link</h3><p>Copy the link and send to anyone</p></div>
+        <div><div style="font-size:24px; font-weight:700;">3</div><h3>Join</h3><p>Up to 10 people can join</p></div>
       </div>
-    </section>
+    </div>
 
-    <section class="section features">
+    <div class="section">
       <h2>Everything you need</h2>
-      <div class="feature-grid">
-        <div class="feature-card"><div style="font-size:28px;">📹</div><h4>HD Video & Audio</h4><p>Crystal clear 720p video and audio</p></div>
-        <div class="feature-card"><div style="font-size:28px;">🔗</div><h4>One Link Join</h4><p>No downloads. Just click the link.</p></div>
-        <div class="feature-card"><div style="font-size:28px;">🖥️</div><h4>Screen Share</h4><p>Share your screen with 1 click</p></div>
+      <div class="grid">
+        <div class="card"><div class="icon">📹</div><h3>HD Video & Audio</h3><p>Crystal clear 720p video and audio</p></div>
+        <div class="card"><div class="icon">👥</div><h3>10 People</h3><p>Group calls for your whole team</p></div>
+        <div class="card"><div class="icon">🔗</div><h3>One Link Join</h3><p>No downloads. Just click the link.</p></div>
       </div>
-    </section>
-
-    <footer>
-      <p>© 2026 Union. Built for teams and friends.</p>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-      <a href="/contact.html">Contact</a>
-      <div class="domain">joinunion.vercel.app</div>
-    </footer>
+    </div>
   </div>
 
-  <div id="room">
-    <h2>Your Room</h2>
-    <p>Share this link:</p>
-    <div id="roomLink" onclick="copyLink()">Tap to copy link</div>
-    <video id="localVideo" autoplay muted playsinline></video>
-    <div id="remoteVideos"></div>
-    <button onclick="goHome()" class="btn-main" style="margin-top:20px;">Leave Call</button>
+  <div id="privacy" class="page-content" style="display:none;">
+    <h1>Privacy Policy</h1>
+    <p>Last updated: April 2026</p>
+    <h3>1. What we collect</h3>
+    <p>Union does not store your video or audio. Calls are peer-to-peer and encrypted. We only collect your room ID to connect people.</p>
+    <h3>2. Camera & Microphone</h3>
+    <p>We only access your camera and microphone when you click "Start a Call". Nothing is recorded or saved.</p>
+    <h3>3. Contact</h3>
+    <p>For privacy questions email: privacy@joinunion.vercel.app</p>
+    <button class="btn-big btn-gray" onclick="showHome()" style="margin-top:20px;">← Back to Home</button>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    let localStream;
-    let peerConnections = {};
-    let roomId;
-    const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-    
-    // ONLY THIS FUNCTION WAS CHANGED FOR IOS
-    async function startCall() {
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "user"}, audio: true});
-        roomId = Math.random().toString(36).substring(2, 8);
-        window.location.hash = roomId;
-        joinRoom(roomId);
-      } catch(e) {
-        alert('Camera Blocked. Tap AA > Website Settings > Camera: Allow > Microphone: Allow');
-      }
-    }
-    
-    function showJoin() {
-      const code = prompt("Enter room code:");
-      if(code) {
-        roomId = code;
-        window.location.hash = roomId;
-        joinRoom(roomId);
-      }
-    }
-    
-    async function joinRoom(id) {
-      document.getElementById('home').style.display = 'none';
-      document.getElementById('room').style.display = 'block';
-      document.getElementById('roomLink').innerText = `https://joinunion.vercel.app/#${id}`;
-      
-      if(!localStream) {
-        try {
-          localStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: "user"}, audio: true});
-        } catch(e) {
-          alert('Please allow camera to join');
-          return;
-        }
-      }
-      document.getElementById('localVideo').srcObject = localStream;
-      socket.emit('join-room', id);
-    }
-    
-    function copyLink() {
-      navigator.clipboard.writeText(document.getElementById('roomLink').innerText);
-      alert('Link copied!');
-    }
-    
-    function goHome() {
-      window.location.hash = '';
-      if(localStream) localStream.getTracks().forEach(t => t.stop());
-      location.reload();
-    }
-    
-    socket.on('user-connected', async (userId) => {
-      const pc = new RTCPeerConnection(config);
-      peerConnections[userId] = pc;
-      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-      pc.onicecandidate = e => e.candidate && socket.emit('ice-candidate', {to: userId, candidate: e.candidate});
-      pc.ontrack = e => {
-        let v = document.createElement('video');
-        v.srcObject = e.streams[0];
-        v.autoplay = true;
-        v.playsInline = true;
-        document.getElementById('remoteVideos').appendChild(v);
-      };
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      socket.emit('offer', {to: userId, offer});
-    });
-    
-    socket.on('offer', async (data) => {
-      const pc = new RTCPeerConnection(config);
-      peerConnections[data.from] = pc;
-      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-      pc.onicecandidate = e => e.candidate && socket.emit('ice-candidate', {to: data.from, candidate: e.candidate});
-      pc.ontrack = e => {
-        let v = document.createElement('video');
-        v.srcObject = e.streams[0];
-        v.autoplay = true;
-        v.playsInline = true;
-        document.getElementById('remoteVideos').appendChild(v);
-      };
-      await pc.setRemoteDescription(data.offer);
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      socket.emit('answer', {to: data.from, answer});
-    });
-    
-    socket.on('answer', async (data) => {
-      await peerConnections[data.from].setRemoteDescription(data.answer);
-    });
-    
-    socket.on('ice-candidate', async (data) => {
-      await peerConnections[data.from].addIceCandidate(data.candidate);
-    });
-    
-    if(window.location.hash) {
-      roomId = window.location.hash.substring(1);
-      joinRoom(roomId);
-    }
-  </script>
+  <div id="terms" class="page-content" style="display:none;">
+    <h1>Terms of Service</h1>
+    <p>Last updated: April 2026</p>
+    <h3>1. Use of Service</h3>
+    <p>Union is provided free for personal and team use. Don't use it for illegal activity.</p>
+    <h3>2. No Recording</h3>
+    <p>You are responsible for getting permission before recording any call.</p>
+    <h3>3. Service Changes</h3>
+    <p>We may update Union at any time to improve the service.</p>
+    <button class="btn-big btn-gray" onclick="showHome()" style="margin-top:20px;">← Back to Home</button>
+  </div>
 
+  <div id="contact" class="page-content" style="display:none;">
+    <h1>Contact Us</h1>
+    <p>Got questions or feedback? We'd love to hear from you.</p>
+    <h3>Email</h3>
+    <p>support@joinunion.vercel.app</p>
+    <h3>Built by</h3>
+    <p>Union Team - Port Harcourt, Nigeria</p>
+    <button class="btn-big btn-gray" onclick="showHome()" style="margin-top:20px;">← Back to Home</button>
+  </div>
+
+  <footer>
+    <p>© 2026 Union. Built for teams and friends.</p>
+    <div style="margin-top:12px;">
+      <a href="#" onclick="showPage('privacy')">Privacy</a> 
+      <a href="#" onclick="showPage('terms')">Terms</a> 
+      <a href="#" onclick="showPage('contact')">Contact</a>
+    </div>
+  </footer>
+
+<script>
+function startCall() {
+  const roomId = Math.random().toString(36).substring(2, 8);
+  window.location.href = `room.html?room=${roomId}&host=1`;
+}
+
+function joinCall() {
+  const link = prompt("Paste the meeting link:");
+  if(link) window.location.href = link;
+}
+
+function showPage(page) {
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('privacy').style.display = 'none';
+  document.getElementById('terms').style.display = 'none';
+  document.getElementById('contact').style.display = 'none';
+  document.getElementById(page).style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function showHome() {
+  document.getElementById('home').style.display = 'block';
+  document.getElementById('privacy').style.display = 'none';
+  document.getElementById('terms').style.display = 'none';
+  document.getElementById('contact').style.display = 'none';
+  window.scrollTo(0,0);
+}
+</script>
 </body>
 </html>
