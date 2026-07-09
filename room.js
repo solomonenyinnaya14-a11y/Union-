@@ -3,7 +3,9 @@ document.getElementById('roomId').innerText = ROOM_ID;
 
 let localStream;
 let peer;
-let conn = null;
+let connections = {}; // Store all peer connections
+let calls = {}; // Store all video calls
+const isHost = window.location.search.includes('host=1');
 
 async function init() {
   try {
@@ -11,78 +13,77 @@ async function init() {
     document.getElementById('localVideo').srcObject = localStream;
   } catch(e) { alert("Allow Camera and Microphone"); }
 
-  const isHost = window.location.search.includes('host=1');
   const myPeerId = isHost? ROOM_ID + '-host' : ROOM_ID + '-guest-' + Date.now();
 
   peer = new Peer(myPeerId, {
-    host: '0.peerjs.com', port: 443, path: '/'
+    host: '0.peerjs.com', port: 443, path: '/',
+    config: { 'iceServers': [ { urls: 'stun:stun.l.google.com:19302' } ] }
   });
 
   peer.on('open', id => {
-    console.log("My ID:", id);
-    if(!isHost) {
-      setTimeout(() => joinHost(), 1500); // Guest joins host
-    }
+    if(!isHost) setTimeout(() => joinRoom(), 1500);
   });
 
   // When someone connects to us
   peer.on('connection', c => {
-    conn = c; // SAVE IT
-    setupConn(c);
+    connections[c.peer] = c;
+    setupDataConn(c);
   });
 
+  // When someone calls us
   peer.on('call', call => {
+    calls[call.peer] = call;
     call.answer(localStream);
-    call.on('stream', stream => {
-      document.getElementById('remoteVideo').srcObject = stream;
-    });
+    call.on('stream', stream => addVideoStream(call.peer, stream));
+    call.on('close', () => removeVideoStream(call.peer));
   });
 }
 
-function joinHost() {
+function joinRoom() {
   const c = peer.connect(ROOM_ID + '-host', { reliable: true });
-  conn = c; // <-- THIS WAS MISSING. Now we save it
-  setupConn(c);
+  connections[ROOM_ID + '-host'] = c;
+  setupDataConn(c);
 
   c.on('open', () => {
-    console.log("Connected to host");
     const call = peer.call(ROOM_ID + '-host', localStream);
-    call.on('stream', stream => {
-      document.getElementById('remoteVideo').srcObject = stream;
-    });
+    calls[ROOM_ID + '-host'] = call;
+    call.on('stream', stream => addVideoStream(ROOM_ID + '-host', stream));
   });
 }
 
-function setupConn(c) { // <-- NEW FUNCTION
-  c.on('data', data => addMessage("Friend", data));
-  c.on('close', () => conn = null);
-  c.on('error', err => console.log(err));
+function setupDataConn(c) {
+  c.on('data', data => {
+    if(data.type === 'chat') addMessage(data.sender, data.msg);
+  });
+  c.on('close', () => delete connections[c.peer]);
 }
 
-function toggleChat() {
-  const chat = document.getElementById('chatPanel');
-  const controls = document.getElementById('controls');
-  if(chat.style.display === 'flex') {
-    chat.style.display = 'none';
-    controls.style.display = 'flex';
-  } else {
-    chat.style.display = 'flex';
-    controls.style.display = 'none';
-    setTimeout(() => document.getElementById('chatInput').focus(), 100);
-  }
+// Add video for new person
+function addVideoStream(peerId, stream) {
+  if(document.getElementById(peerId)) return;
+  const video = document.createElement('video');
+  video.id = peerId;
+  video.srcObject = stream;
+  video.autoplay = true;
+  video.playsInline = true;
+  document.getElementById('videos').appendChild(video);
 }
 
+function removeVideoStream(peerId) {
+  const video = document.getElementById(peerId);
+  if(video) video.remove();
+  delete calls[peerId];
+}
+
+// CHAT: Send to all 10 people
 function sendChat() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
   if(msg === '') return;
 
-  if(conn && conn.open) {
-    conn.send(msg); // Now this will work both ways
-  } else {
-    alert("Not connected yet. Wait 2 seconds.");
-  }
-
+  Object.values(connections).forEach(c => {
+    if(c.open) c.send({type: 'chat', sender: 'You', msg: msg});
+  });
   addMessage("You", msg);
   input.value = '';
 }
@@ -93,16 +94,22 @@ function addMessage(sender, text) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// iPhone keyboard fix
-document.getElementById('chatInput').addEventListener('focus', () => {
-  document.getElementById('controls').style.bottom = '300px';
-});
-document.getElementById('chatInput').addEventListener('blur', () => {
-  document.getElementById('controls').style.bottom = '20px';
-});
+// TOGGLE BUTTONS - Now works for everyone
+function toggleMic() {
+  localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled;
+  document.getElementById('micBtn').classList.toggle('active');
+}
+function toggleCam() {
+  localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled;
+  document.getElementById('camBtn').classList.toggle('active');
+}
 
-function toggleMic() { localStream.getAudioTracks()[0].enabled =!localStream.getAudioTracks()[0].enabled; document.getElementById('micBtn').classList.toggle('active'); }
-function toggleCam() { localStream.getVideoTracks()[0].enabled =!localStream.getVideoTracks()[0].enabled; document.getElementById('camBtn').classList.toggle('active'); }
+function toggleChat() {
+  const chat = document.getElementById('chatPanel');
+  chat.style.display = chat.style.display === 'flex'? 'none' : 'flex';
+  document.getElementById('controls').style.display = chat.style.display === 'flex'? 'none' : 'flex';
+}
+
 function leave() { window.location.href = 'index.html'; }
 function copyRoom() { navigator.clipboard.writeText(window.location.href); alert("Link copied!"); }
 
