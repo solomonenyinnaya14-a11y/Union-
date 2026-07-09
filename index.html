@@ -1,16 +1,26 @@
 <!DOCTYPE html>
-<html>
-<body style="background:#000; display:flex; justify-content:center; align-items:center; height:100vh">
-  <div>
-    <button onclick="startCall()" style="padding:20px 40px; font-size:20px; background:#007AFF; color:white; border:none; border-radius:30px">Start Call</button>
-    <button onclick="joinRoom()" style="padding:20px 40px; font-size:20px; background:#333; color:white; border:none; border-radius:30px; margin-left:10px">Join Call</button>
-  </div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Union</title>
+  <style>
+    body { background: #000; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+   .btn { padding: 14px 28px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; margin: 0 8px; }
+   .btn-start { background: #007AFF; color: white; }
+   .btn-join { background: #2c2c2e; color: white; }
+  </style>
+</head>
+<body>
+  <button class="btn btn-start" onclick="startCall()">Start Call</button>
+  <button class="btn btn-join" onclick="joinCall()">Join Call</button>
+
 <script>
 function startCall() {
   const roomId = Math.random().toString(36).substring(2, 8);
-  window.location.href = `room.html?room=${roomId}&host=1`;
+  window.location.href = `room.html?room=${roomId}`;
 }
-function joinRoom() {
+function joinCall() {
   const link = prompt("Paste the meeting link:");
   if(link) window.location.href = link;
 }
