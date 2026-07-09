@@ -1,11 +1,19 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { ExpressPeerServer } from "peer"; // For iPhone
 import path from "path";
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+
+// PEERJS SERVER - REQUIRED FOR IPHONE
+const peerServer = ExpressPeerServer(server, {
+  debug: true,
+  path: '/peerjs'
+});
+app.use('/peerjs', peerServer);
 
 app.use(express.static('.')); // serve html/css/js
 
@@ -22,6 +30,11 @@ io.on("connection", socket => {
     socket.to(roomId).emit("user-connected", peerId);
     
     rooms[roomId].push(peerId);
+
+    // CHAT
+    socket.on("chat", (roomId, msg) => {
+      socket.to(roomId).emit("chat", peerId, msg);
+    });
 
     socket.on("disconnect", () => {
       rooms[roomId] = rooms[roomId].filter(id => id!== peerId);
