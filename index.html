@@ -4,38 +4,43 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Union - Meet Together. Build Together.</title>
-  <meta name="description" content="Free video meetings. No downloads, no accounts. Up to 10 people.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
     body { background: #fff; color: #111; text-align: center; }
     
-    header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; max-width: 1200px; margin: 0 auto; }
-    .logo { font-size: 24px; font-weight: 700; color: #2563eb; display: flex; align-items: center; gap: 8px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; max-width: 1200px; margin: 0 auto; }
+   .logo { font-size: 20px; font-weight: 700; color: #2563eb; display: flex; align-items: center; gap: 6px; }
     nav { display: flex; gap: 12px; align-items: center; }
-    nav a { text-decoration: none; color: #2563eb; font-weight: 600; }
-    .btn { background: #2563eb; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
-    .btn:hover { background: #1d4ed8; }
+   .btn-small { background: #2563eb; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; font-size: 14px; }
+   .btn-small:hover { background: #1d4ed8; }
+   .link { text-decoration: none; color: #2563eb; font-weight: 600; font-size: 14px; }
 
-    .hero { padding: 80px 20px; }
-    .hero h1 { font-size: 48px; font-weight: 800; margin-bottom: 16px; }
-    .hero p { font-size: 18px; color: #555; margin-bottom: 32px; }
+   .hero { padding: 40px 20px; }
+   .hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
+   .hero p { font-size: 15px; color: #555; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto; }
+   .btn-big { background: #2563eb; color: white; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; border: none; cursor: pointer; font-size: 16px; display: inline-block; }
+   .btn-big:hover { background: #1d4ed8; }
 
-    .steps { display: flex; justify-content: center; gap: 60px; padding: 40px 20px; flex-wrap: wrap; }
-    .step h3 { font-size: 20px; margin-bottom: 8px; }
-    .step p { color: #666; }
+   .steps { display: flex; justify-content: center; gap: 40px; padding: 20px 20px 60px; flex-wrap: wrap; }
+   .step h3 { font-size: 18px; margin: 8px 0 4px; }
+   .step p { color: #666; font-size: 14px; }
+   .step-number { font-size: 24px; font-weight: 700; }
 
-    .features { padding: 60px 20px; background: #f9fafb; }
-    .features h2 { font-size: 32px; margin-bottom: 40px; }
-    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
-    .feature-card { background: white; padding: 30px; border-radius: 12px; border: 1px solid #eee; }
-    .feature-card h4 { font-size: 18px; margin: 12px 0 8px; }
-    .feature-card p { color: #666; font-size: 14px; }
+   .features { padding: 40px 20px; background: #f9fafb; }
+   .features h2 { font-size: 24px; margin-bottom: 24px; }
+   .feature-card { background: white; padding: 24px; border-radius: 12px; border: 1px solid #eee; max-width: 400px; margin: 0 auto; }
+   .feature-card h4 { font-size: 16px; margin: 8px 0 4px; }
+   .feature-card p { color: #666; font-size: 14px; }
 
-    footer { padding: 40px 20px; border-top: 1px solid #eee; margin-top: 60px; }
-    footer p { color: #888; margin-bottom: 12px; }
-    footer a { color: #111; text-decoration: none; margin: 0 12px; font-weight: 500; }
-    footer a:hover { text-decoration: underline; }
-    .domain { margin-top: 20px; font-size: 14px; color: #666; }
+    footer { padding: 30px 20px; border-top: 1px solid #eee; margin-top: 40px; }
+    footer p { color: #888; margin-bottom: 12px; font-size: 14px; }
+    footer a { color: #111; text-decoration: none; margin: 0 10px; font-weight: 500; font-size: 14px; }
+   .domain { margin-top: 12px; font-size: 12px; color: #666; }
+    
+    #room { display: none; padding: 20px; }
+    video { width: 90%; max-width: 400px; border-radius: 12px; margin: 10px; background: #000; }
+    #roomLink { background: #f3f4f6; padding: 12px; border-radius: 8px; margin: 20px auto; max-width: 500px; word-break: break-all; cursor: pointer; }
+    #remoteVideos { display: flex; flex-wrap: wrap; justify-content: center; }
   </style>
 </head>
 <body>
@@ -43,50 +48,49 @@
   <header>
     <div class="logo">📹 Union</div>
     <nav>
-      <a href="/#join">Join</a>
-      <a href="/#start" class="btn">Start a Call</a>
+      <a href="#" onclick="showJoin()" class="link">Join</a>
+      <button onclick="createRoom()" class="btn-small">Start a Call</button>
     </nav>
   </header>
 
-  <section class="hero">
-    <h1>Meet Together. Build Together.</h1>
-    <p>A video meeting app built with WebRTC. No downloads, no accounts, 1-click to join.</p>
-    <a href="/#start" class="btn" style="font-size:18px; padding:14px 28px;">Start a Call</a>
-  </section>
+  <div id="home">
+    <section class="hero">
+      <h1>Meet Together. Build Together.</h1>
+      <p>A video meeting app built with WebRTC. No downloads, no accounts, 1-click to join.</p>
+      <button onclick="createRoom()" class="btn-big">Start a Call</button>
+    </section>
 
-  <section class="steps">
-    <div class="step">
-      <h3>2</h3>
-      <h3>Share Link</h3>
-      <p>Copy the link and send to anyone</p>
-    </div>
-    <div class="step">
-      <h3>3</h3>
-      <h3>Join</h3>
-      <p>Up to 10 people can join</p>
-    </div>
-  </section>
+    <section class="steps">
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Share Link</h3>
+        <p>Copy the link and send to anyone</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Join</h3>
+        <p>Up to 10 people can join</p>
+      </div>
+    </section>
 
-  <section class="features">
-    <h2>Everything you need</h2>
-    <div class="feature-grid">
+    <section class="features">
+      <h2>Everything you need</h2>
       <div class="feature-card">
         <div style="font-size:32px;">📹</div>
         <h4>HD Video & Audio</h4>
         <p>Crystal clear 720p video and audio</p>
       </div>
-      <div class="feature-card">
-        <div style="font-size:32px;">👥</div>
-        <h4>10 People</h4>
-        <p>Group calls for your whole team</p>
-      </div>
-      <div class="feature-card">
-        <div style="font-size:32px;">🔗</div>
-        <h4>One Link Join</h4>
-        <p>No downloads. Just click the link.</p>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
+
+  <div id="room">
+    <h2>Your Room</h2>
+    <p>Share this link:</p>
+    <div id="roomLink" onclick="copyLink()"></div>
+    <video id="localVideo" autoplay muted playsinline></video>
+    <div id="remoteVideos"></div>
+    <button onclick="goHome()" class="btn-small" style="margin-top:20px;">Leave Call</button>
+  </div>
 
   <footer>
     <p>© 2026 Union. Built for teams and friends.</p>
@@ -98,8 +102,96 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // Your WebRTC + Socket.io code goes here
-    // This is where you handle "Start a Call" and "Join" logic
+    const socket = io();
+    let localStream;
+    let peerConnections = {};
+    let roomId;
+    const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    
+    function createRoom() {
+      roomId = Math.random().toString(36).substring(2, 8);
+      window.location.hash = roomId;
+      joinRoom(roomId);
+    }
+    
+    function showJoin() {
+      const code = prompt("Enter room code:");
+      if(code) {
+        roomId = code;
+        window.location.hash = roomId;
+        joinRoom(roomId);
+      }
+    }
+    
+    async function joinRoom(id) {
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('room').style.display = 'block';
+      document.getElementById('roomLink').innerText = `https://joinunion.vercel.app/#${id}`;
+      
+      localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+      document.getElementById('localVideo').srcObject = localStream;
+      
+      socket.emit('join-room', id);
+    }
+    
+    function copyLink() {
+      navigator.clipboard.writeText(document.getElementById('roomLink').innerText);
+      alert('Link copied!');
+    }
+    
+    function goHome() {
+      window.location.hash = '';
+      location.reload();
+    }
+    
+    socket.on('user-connected', async (userId) => {
+      const pc = new RTCPeerConnection(config);
+      peerConnections[userId] = pc;
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      pc.onicecandidate = e => e.candidate && socket.emit('ice-candidate', {to: userId, candidate: e.candidate});
+      pc.ontrack = e => {
+        let v = document.createElement('video');
+        v.srcObject = e.streams[0];
+        v.autoplay = true;
+        v.playsInline = true;
+        document.getElementById('remoteVideos').appendChild(v);
+      };
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      socket.emit('offer', {to: userId, offer});
+    });
+    
+    socket.on('offer', async (data) => {
+      const pc = new RTCPeerConnection(config);
+      peerConnections[data.from] = pc;
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      pc.onicecandidate = e => e.candidate && socket.emit('ice-candidate', {to: data.from, candidate: e.candidate});
+      pc.ontrack = e => {
+        let v = document.createElement('video');
+        v.srcObject = e.streams[0];
+        v.autoplay = true;
+        v.playsInline = true;
+        document.getElementById('remoteVideos').appendChild(v);
+      };
+      await pc.setRemoteDescription(data.offer);
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      socket.emit('answer', {to: data.from, answer});
+    });
+    
+    socket.on('answer', async (data) => {
+      await peerConnections[data.from].setRemoteDescription(data.answer);
+    });
+    
+    socket.on('ice-candidate', async (data) => {
+      await peerConnections[data.from].addIceCandidate(data.candidate);
+    });
+    
+    // Auto join if URL has #roomId
+    if(window.location.hash) {
+      roomId = window.location.hash.substring(1);
+      joinRoom(roomId);
+    }
   </script>
 
 </body>
