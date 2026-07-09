@@ -1,66 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Union Room</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: #000; color: #fff; overflow: hidden; height: 100vh; }
-    #startScreen { position: absolute; top:0; left:0; width:100%; height:100%; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; }
-    #startBtn { padding: 16px 32px; background: #007AFF; color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: 700; }
-
-    #remoteVideo { width: 100%; height: 100vh; object-fit: cover; background: #111; }
-    #localVideo { position: absolute; top: 20px; right: 20px; width: 120px; height: 160px; border-radius: 12px; object-fit: cover; border: 2px solid #333; z-index: 10; }
-    #roomInfo { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 8px 14px; border-radius: 20px; font-size: 14px; z-index: 10; display: flex; align-items: center; gap: 8px; }
-    #copyBtn { background: #007AFF; border: none; color: white; padding: 4px 10px; border-radius: 12px; cursor: pointer; font-weight: 600; }
-    #controls { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; background: rgba(30,30,30,0.8); padding: 12px 20px; border-radius: 30px; backdrop-filter: blur(10px); z-index: 20; transition: bottom 0.3s ease; }
-   .btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #333; color: white; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-   .btn.active { background: #ff3b30; }
-   .btn.chat { background: #007AFF; }
-   .btn.leave { background: #ff3b30; }
-    #chatPanel { position: absolute; bottom: 0; left: 0; width: 100%; height: 50vh; background: #1a1a1a; display: none; flex-direction: column; border-top: 1px solid #333; z-index: 30; }
-    #chatMessages { flex: 1; overflow-y: auto; padding: 15px; }
-   .msg { margin-bottom: 10px; font-size: 15px; }
-   .msg b { color: #007AFF; }
-    #chatInputBox { display: flex; padding: 10px; border-top: 1px solid #333; background: #222; }
-    #chatInput { flex: 1; padding: 10px 14px; border-radius: 20px; border: none; background: #333; color: white; outline: none; }
-    #sendBtn { background: #007AFF; border: none; color: white; padding: 10px 16px; border-radius: 20px; margin-left: 8px; font-weight: 600; cursor: pointer; }
-    #closeChat { position: absolute; top: 10px; right: 15px; font-size: 24px; background: none; border: none; color: #aaa; cursor: pointer; z-index: 31; }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{background:#000;color:#fff;margin:0;overflow:hidden}
+video{width:100%;height:100vh;object-fit:cover}
+#local{position:absolute;top:20px;right:20px;width:120px;height:160px;border-radius:12px}
+#chat{position:absolute;bottom:0;width:100%;height:40%;background:#111;display:none;flex-direction:column}
+#msgs{flex:1;overflow-y:auto;padding:10px}
+#input{display:flex;padding:10px}
+#input input{flex:1;padding:10px;border-radius:20px;border:none;background:#222;color:#fff}
+#controls{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:10px}
+button{padding:12px 20px;border-radius:30px;border:none}
+</style>
 </head>
 <body>
-  <div id="startScreen">
-    <h2>Join Room: <span id="roomIdTop"></span></h2>
-    <button id="startBtn" onclick="startCall()">Join Call</button>
+<video id="remote" autoplay playsinline></video>
+<video id="local" autoplay playsinline muted></video>
+
+<div id="controls">
+  <button onclick="toggleChat()">💬</button>
+  <button onclick="copy()">Copy Link</button>
+</div>
+
+<div id="chat">
+  <div id="msgs"></div>
+  <div id="input">
+    <input id="msg" placeholder="Send...">
+    <button onclick="send()">Send</button>
   </div>
+</div>
 
-  <video id="remoteVideo" autoplay playsinline></video>
-  <video id="localVideo" autoplay playsinline muted></video>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const ROOM = params.get('room');
+const IS_HOST = params.get('host') === '1';
+let peer, conn, localStream;
 
-  <div id="roomInfo" style="display:none">
-    Room: <span id="roomId"></span>
-    <button id="copyBtn" onclick="copyRoom()">Copy</button>
-  </div>
+async function init() {
+  localStream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+  document.getElementById('local').srcObject = localStream;
 
-  <div id="controls" style="display:none">
-    <button class="btn" id="micBtn" onclick="toggleMic()">🎤</button>
-    <button class="btn" id="camBtn" onclick="toggleCam()">📹</button>
-    <button class="btn chat" onclick="toggleChat()">💬</button>
-    <button class="btn leave" onclick="leave()">📞</button>
-  </div>
+  peer = new Peer(ROOM + (IS_HOST? '-host' : '-guest-'+Date.now()), {
+    config: {'iceServers': [{urls:'stun:stun.l.google.com:19302'}]}
+  });
 
-  <div id="chatPanel">
-    <button id="closeChat" onclick="toggleChat()">×</button>
-    <div id="chatMessages"></div>
-    <div id="chatInputBox">
-      <input type="text" id="chatInput" placeholder="Send a message...">
-      <button id="sendBtn" onclick="sendChat()">Send</button>
-    </div>
-  </div>
+  peer.on('open', () => {
+    if(!IS_HOST) {
+      conn = peer.connect(ROOM + '-host');
+      conn.on('data', d => addMsg('Friend', d));
+      peer.call(ROOM + '-host', localStream).on('stream', s => document.getElementById('remote').srcObject = s);
+    }
+  });
 
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-  <script src="room.js"></script>
+  peer.on('connection', c => {
+    conn = c;
+    conn.on('data', d => addMsg('Friend', d));
+  });
+  peer.on('call', call => {
+    call.answer(localStream);
+    call.on('stream', s => document.getElementById('remote').srcObject = s);
+  });
+}
+
+function toggleChat(){ document.getElementById('chat').style.display = document.getElementById('chat').style.display==='flex'?'none':'flex' }
+function send(){ 
+  const m = document.getElementById('msg').value; 
+  if(conn && conn.open) conn.send(m); 
+  addMsg('You', m); 
+  document.getElementById('msg').value='';
+}
+function addMsg(who, txt){ document.getElementById('msgs').innerHTML += `<div><b>${who}:</b> ${txt}</div>` }
+function copy(){ navigator.clipboard.writeText(window.location.href.split('&')[0]); alert('Copied') }
+
+init();
+</script>
 </body>
 </html>
